@@ -49,7 +49,7 @@ export default function LandingMain() {
               </p>
               <a href={getLoginUrl()}>
                 <Button className="w-full">
-                  Login como Superadmin
+                  Login com Google
                 </Button>
               </a>
             </div>

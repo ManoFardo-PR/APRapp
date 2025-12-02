@@ -129,9 +129,13 @@ export default function LandingCompany() {
 
             <a href={getLoginUrl()}>
               <Button className="w-full h-14 text-lg" size="lg">
-                Fazer Login
+                Fazer Login com Google
               </Button>
             </a>
+            
+            <p className="text-xs text-gray-500 mt-4">
+              O login é realizado de forma segura através do Google
+            </p>
 
             <div className="mt-8 pt-8 border-t border-gray-200">
               <p className="text-sm text-gray-600 mb-4">

@@ -189,3 +189,9 @@
 ## Correções de Navegação
 - [x] Corrigir botão "Ver Landing" no dashboard superadmin
 - [x] Corrigir redirecionamento após logout para landing page principal
+
+
+## Correção de Autenticação Landing Page
+- [x] Configurar sistema de login para aceitar apenas Google
+- [x] Modificar getLoginUrl para forçar provedor Google
+- [x] Atualizar todas as páginas que usam login
