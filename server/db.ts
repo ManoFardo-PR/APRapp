@@ -52,6 +52,19 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.lastSignedIn = user.lastSignedIn;
       updateSet.lastSignedIn = user.lastSignedIn;
     }
+    
+    // Check if email matches a pre-configured admin email
+    if (user.email && !user.companyId && !user.role) {
+      const companyMatch = await findCompanyByAdminEmail(user.email);
+      if (companyMatch) {
+        values.companyId = companyMatch.companyId;
+        values.role = 'company_admin';
+        updateSet.companyId = companyMatch.companyId;
+        updateSet.role = 'company_admin';
+        console.log(`[Auth] Auto-assigned user ${user.email} as company_admin for company ${companyMatch.companyName}`);
+      }
+    }
+    
     if (user.role !== undefined) {
       values.role = user.role;
       updateSet.role = user.role;
@@ -292,4 +305,63 @@ export async function updateCompanyUser(userId: number, data: {
     .update(users)
     .set(updateData)
     .where(eq(users.id, userId));
+}
+
+
+// ============================================================================
+// Company Admin Emails Management
+// ============================================================================
+
+export async function addCompanyAdminEmail(data: { companyId: number; email: string; createdBy: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { companyAdminEmails } = await import("../drizzle/schema");
+  
+  await db.insert(companyAdminEmails).values({
+    companyId: data.companyId,
+    email: data.email.toLowerCase().trim(),
+    createdBy: data.createdBy,
+  });
+}
+
+export async function removeCompanyAdminEmail(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { companyAdminEmails } = await import("../drizzle/schema");
+  
+  await db.delete(companyAdminEmails).where(eq(companyAdminEmails.id, id));
+}
+
+export async function getCompanyAdminEmails(companyId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const { companyAdminEmails } = await import("../drizzle/schema");
+  
+  return await db
+    .select()
+    .from(companyAdminEmails)
+    .where(eq(companyAdminEmails.companyId, companyId));
+}
+
+export async function findCompanyByAdminEmail(email: string) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const { companyAdminEmails, companies } = await import("../drizzle/schema");
+  
+  const result = await db
+    .select({
+      companyId: companyAdminEmails.companyId,
+      companyCode: companies.code,
+      companyName: companies.name,
+    })
+    .from(companyAdminEmails)
+    .innerJoin(companies, eq(companyAdminEmails.companyId, companies.id))
+    .where(eq(companyAdminEmails.email, email.toLowerCase().trim()))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : null;
 }

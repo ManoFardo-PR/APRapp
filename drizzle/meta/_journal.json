@@ -15,6 +15,13 @@
       "when": 1764687003547,
       "tag": "0001_legal_nomad",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1764691718963,
+      "tag": "0002_open_miek",
+      "breakpoints": true
     }
   ]
 }

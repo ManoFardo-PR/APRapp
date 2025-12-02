@@ -131,6 +131,21 @@ export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = typeof auditLogs.$inferInsert;
 
 /**
+ * Pre-configured admin emails for companies
+ * When a user with this email logs in, they are automatically assigned as company_admin
+ */
+export const companyAdminEmails = mysqlTable("company_admin_emails", {
+  id: int("id").autoincrement().primaryKey(),
+  companyId: int("companyId").notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  createdBy: int("createdBy").notNull(), // superadmin who added this email
+});
+
+export type CompanyAdminEmail = typeof companyAdminEmails.$inferSelect;
+export type InsertCompanyAdminEmail = typeof companyAdminEmails.$inferInsert;
+
+/**
  * Statistics - Pre-calculated statistics for performance
  */
 export const statistics = mysqlTable("statistics", {

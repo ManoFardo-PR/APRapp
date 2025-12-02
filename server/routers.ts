@@ -4,7 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure, adminProcedure, superadminProcedure } from "./_core/trpc";
 import { z } from "zod";
 import * as db from "./db";
-import { getUsersByCompany, countActiveUsersByCompany, createCompanyUser, updateCompanyUser, getCompanyById, getUserById, createAuditLog } from "./db";
+import { getUsersByCompany, countActiveUsersByCompany, createCompanyUser, updateCompanyUser, getCompanyById, getUserById, createAuditLog, addCompanyAdminEmail, removeCompanyAdminEmail, getCompanyAdminEmails } from "./db";
 import { TRPCError } from "@trpc/server";
 
 import * as aprDb from "./aprDb";
@@ -232,9 +232,68 @@ export const appRouter = router({
         }
 
         return { success: true };
+    }),
+
+    // Add admin email for company
+    addAdminEmail: superadminProcedure
+      .input(z.object({
+        companyId: z.number().int().positive(),
+        email: z.string().email(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        await addCompanyAdminEmail({
+          companyId: input.companyId,
+          email: input.email,
+          createdBy: ctx.user.id,
+        });
+
+        await db.createAuditLog({
+          companyId: input.companyId,
+          userId: ctx.user.id,
+          action: "ADD_ADMIN_EMAIL",
+          entityType: "company",
+          entityId: input.companyId,
+          details: { email: input.email },
+          ipAddress: ctx.req.ip,
+          userAgent: ctx.req.headers["user-agent"] || null,
+        });
+
+        return { success: true };
       }),
 
-    // Get current user's profile
+    // Remove admin email
+    removeAdminEmail: superadminProcedure
+      .input(z.object({
+        id: z.number().int().positive(),
+        companyId: z.number().int().positive(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        await removeCompanyAdminEmail(input.id);
+
+        await db.createAuditLog({
+          companyId: input.companyId,
+          userId: ctx.user.id,
+          action: "REMOVE_ADMIN_EMAIL",
+          entityType: "company",
+          entityId: input.companyId,
+          details: { emailId: input.id },
+          ipAddress: ctx.req.ip,
+          userAgent: ctx.req.headers["user-agent"] || null,
+        });
+
+        return { success: true };
+      }),
+
+    // Get admin emails for company
+    getAdminEmails: superadminProcedure
+      .input(z.object({
+        companyId: z.number().int().positive(),
+      }))
+      .query(async ({ input }) => {
+        return await getCompanyAdminEmails(input.companyId);
+      }),
+
+    // Get company by codes profile
     getProfile: protectedProcedure.query(async ({ ctx }) => {
       const user = await db.getUserById(ctx.user.id);
       if (!user) {

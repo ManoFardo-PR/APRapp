@@ -207,3 +207,11 @@
 - [x] Adicionar filtros (perfil, status, busca)
 - [x] Adicionar card de estatísticas de usuários
 - [x] Adicionar navegação para página no Dashboard Testar fluxo completo de gestão
+
+
+## Configuração de Emails de Admin por Empresa
+- [x] Criar tabela company_admin_emails no banco de dados
+- [x] Adicionar procedures tRPC para adicionar/remover emails de admin
+- [x] Atualizar SuperAdminDashboard para mostrar e gerenciar emails de admin
+- [x] Implementar lógica de auto-associação no callback OAuth
+- [x] Testar fluxo completo de primeiro login com email pré-configurado

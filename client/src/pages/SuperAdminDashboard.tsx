@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Building2, Users, Shield, Plus, Edit, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { Building2, Users, Shield, Plus, Edit, CheckCircle, XCircle, Loader2, Mail, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { useLocation } from "wouter";
@@ -22,9 +22,17 @@ export default function SuperAdminDashboard() {
   const [newCompanyCode, setNewCompanyCode] = useState("");
   const [newCompanyName, setNewCompanyName] = useState("");
   const [newCompanyMaxUsers, setNewCompanyMaxUsers] = useState(10);
+  const [expandedCompanyId, setExpandedCompanyId] = useState<number | null>(null);
+  const [newAdminEmail, setNewAdminEmail] = useState("");
 
   // Queries
   const { data: companies, isLoading, refetch } = trpc.companies.list.useQuery();
+  
+  // Query for admin emails (only when company is expanded)
+  const { data: adminEmails, refetch: refetchAdminEmails } = trpc.companies.getAdminEmails.useQuery(
+    { companyId: expandedCompanyId || 0 },
+    { enabled: !!expandedCompanyId }
+  );
 
   // Mutations
   const createCompanyMutation = trpc.companies.create.useMutation({
@@ -37,6 +45,27 @@ export default function SuperAdminDashboard() {
       refetch();
     },
     onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const addAdminEmailMutation = trpc.companies.addAdminEmail.useMutation({
+    onSuccess: () => {
+      toast.success("Email de admin adicionado com sucesso!");
+      setNewAdminEmail("");
+      refetchAdminEmails();
+    },
+    onError: (error: any) => {
+      toast.error(error.message);
+    },
+  });
+
+  const removeAdminEmailMutation = trpc.companies.removeAdminEmail.useMutation({
+    onSuccess: () => {
+      toast.success("Email de admin removido com sucesso!");
+      refetchAdminEmails();
+    },
+    onError: (error: any) => {
       toast.error(error.message);
     },
   });
@@ -87,6 +116,31 @@ export default function SuperAdminDashboard() {
       id: companyId,
       isActive: !currentStatus,
     });
+  };
+
+  const handleAddAdminEmail = (companyId: number) => {
+    if (!newAdminEmail.trim()) {
+      toast.error("Digite um email válido");
+      return;
+    }
+
+    addAdminEmailMutation.mutate({
+      companyId,
+      email: newAdminEmail.trim(),
+    });
+  };
+
+  const handleRemoveAdminEmail = (emailId: number, companyId: number) => {
+    if (confirm("Tem certeza que deseja remover este email de admin?")) {
+      removeAdminEmailMutation.mutate({
+        id: emailId,
+        companyId,
+      });
+    }
+  };
+
+  const toggleCompanyExpand = (companyId: number) => {
+    setExpandedCompanyId(expandedCompanyId === companyId ? null : companyId);
   };
 
   if (!user || user.role !== "superadmin") {
@@ -252,52 +306,126 @@ export default function SuperAdminDashboard() {
             ) : companies && companies.length > 0 ? (
               <div className="space-y-4">
                 {companies.map((company) => (
-                  <div
-                    key={company.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center gap-4 flex-1">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <Building2 className="h-5 w-5 text-primary" />
+                  <div key={company.id} className="border rounded-lg overflow-hidden">
+                    {/* Company Header */}
+                    <div className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <Building2 className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold">{company.name}</h3>
+                            {company.isActive ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+                                <CheckCircle className="h-3 w-3" />
+                                Ativa
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                                <XCircle className="h-3 w-3" />
+                                Inativa
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Código: <span className="font-mono font-semibold">{company.code}</span> • 
+                            Usuários: {company.userCount || 0}/{company.maxUsers}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold">{company.name}</h3>
-                          {company.isActive ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                              <CheckCircle className="h-3 w-3" />
-                              Ativa
-                            </span>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditCompany(company)}
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          Editar
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(`/empresa/${company.code}`, '_blank')}
+                        >
+                          Ver Landing
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toggleCompanyExpand(company.id)}
+                        >
+                          <Mail className="h-4 w-4 mr-1" />
+                          Admins
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Expanded Section - Admin Emails */}
+                    {expandedCompanyId === company.id && (
+                      <div className="border-t bg-gray-50 p-4 space-y-4">
+                        <div>
+                          <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                            <Mail className="h-4 w-4" />
+                            Emails de Administradores
+                          </h4>
+                          <p className="text-xs text-muted-foreground mb-3">
+                            Quando um usuário com um desses emails fizer login, será automaticamente associado como admin desta empresa.
+                          </p>
+
+                          {/* Add Email Form */}
+                          <div className="flex gap-2 mb-3">
+                            <Input
+                              type="email"
+                              placeholder="email@empresa.com"
+                              value={newAdminEmail}
+                              onChange={(e) => setNewAdminEmail(e.target.value)}
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleAddAdminEmail(company.id);
+                                }
+                              }}
+                            />
+                            <Button
+                              size="sm"
+                              onClick={() => handleAddAdminEmail(company.id)}
+                              disabled={addAdminEmailMutation.isPending}
+                            >
+                              {addAdminEmailMutation.isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Plus className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+
+                          {/* Email List */}
+                          {adminEmails && adminEmails.length > 0 ? (
+                            <div className="space-y-2">
+                              {adminEmails.map((adminEmail: any) => (
+                                <div
+                                  key={adminEmail.id}
+                                  className="flex items-center justify-between p-2 bg-white border rounded">
+                                  <span className="text-sm font-mono">{adminEmail.email}</span>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleRemoveAdminEmail(adminEmail.id, company.id)}
+                                    disabled={removeAdminEmailMutation.isPending}
+                                  >
+                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
-                              <XCircle className="h-3 w-3" />
-                              Inativa
-                            </span>
+                            <p className="text-sm text-muted-foreground text-center py-4">
+                              Nenhum email de admin configurado
+                            </p>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          Código: <span className="font-mono font-semibold">{company.code}</span> • 
-                          Usuários: {company.userCount || 0}/{company.maxUsers}
-                        </p>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEditCompany(company)}
-                      >
-                        <Edit className="h-4 w-4 mr-1" />
-                        Editar
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(`/empresa/${company.code}`, '_blank')}
-                      >
-                        Ver Landing
-                      </Button>
-                    </div>
+                    )}
                   </div>
                 ))}
               </div>
