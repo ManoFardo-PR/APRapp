@@ -8,6 +8,7 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import LandingMain from "./pages/LandingMain";
 import LandingCompany from "./pages/LandingCompany";
 import Dashboard from "./pages/Dashboard";
+import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import AprList from "./pages/AprList";
 import NewApr from "./pages/NewApr";
 
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/" component={LandingMain} />
       <Route path="/empresa/:code" component={LandingCompany} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/admin/dashboard" component={SuperAdminDashboard} />
       <Route path="/aprs" component={AprList} />
       <Route path="/aprs/new" component={NewApr} />
       <Route path="/404" component={NotFound} />

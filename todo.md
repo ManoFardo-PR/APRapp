@@ -166,3 +166,11 @@
 - [x] Corrigir erro 403 do Google OAuth
 - [x] Verificar fluxo de callback OAuth
 - [x] Testar login de superadmin
+
+
+## Dashboard Superadmin
+- [x] Criar dashboard específico para superadmin sem dependência de companyId
+- [x] Implementar página de gestão de empresas
+- [x] Adicionar formulário de criação de empresa
+- [x] Listar todas as empresas cadastradas
+- [x] Permitir edição de empresas (nome, limites, status)

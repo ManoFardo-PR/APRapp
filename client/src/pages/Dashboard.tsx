@@ -3,12 +3,19 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { FileText, Clock, CheckCircle, XCircle, Plus } from "lucide-react";
 
 export default function Dashboard() {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const [, setLocation] = useLocation();
+
+  // Redirect superadmin to dedicated dashboard
+  if (user && user.role === "superadmin") {
+    setLocation("/admin/dashboard");
+    return null;
+  }
   const { data: stats, isLoading: statsLoading } = trpc.aprs.getStats.useQuery();
   const { data: myAprs, isLoading: aprsLoading } = trpc.aprs.list.useQuery({ 
     userId: user?.id 

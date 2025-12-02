@@ -130,7 +130,23 @@ export async function getAllCompanies() {
   const db = await getDb();
   if (!db) return [];
 
-  return await db.select().from(companies).orderBy(desc(companies.createdAt));
+  const allCompanies = await db.select().from(companies).orderBy(desc(companies.createdAt));
+  
+  // Add user count for each company
+  const companiesWithCount = await Promise.all(
+    allCompanies.map(async (company) => {
+      const companyUsers = await db
+        .select()
+        .from(users)
+        .where(eq(users.companyId, company.id));
+      return {
+        ...company,
+        userCount: companyUsers.length,
+      };
+    })
+  );
+  
+  return companiesWithCount;
 }
 
 export async function updateCompany(id: number, updates: Partial<InsertCompany>) {
