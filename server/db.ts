@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, companies, InsertCompany, auditLogs, InsertAuditLog } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -56,8 +56,20 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.role = user.role;
       updateSet.role = user.role;
     } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
+      values.role = 'superadmin';
+      updateSet.role = 'superadmin';
+    }
+    if (user.companyId !== undefined) {
+      values.companyId = user.companyId;
+      updateSet.companyId = user.companyId;
+    }
+    if (user.language !== undefined) {
+      values.language = user.language;
+      updateSet.language = user.language;
+    }
+    if (user.isActive !== undefined) {
+      values.isActive = user.isActive;
+      updateSet.isActive = user.isActive;
     }
 
     if (!values.lastSignedIn) {
@@ -89,4 +101,102 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Company management functions
+export async function createCompany(company: InsertCompany) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(companies).values(company);
+  return result;
+}
+
+export async function getCompanyByCode(code: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(companies).where(eq(companies.code, code)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getCompanyById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(companies).where(eq(companies.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getAllCompanies() {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(companies).orderBy(desc(companies.createdAt));
+}
+
+export async function updateCompany(id: number, updates: Partial<InsertCompany>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(companies).set(updates).where(eq(companies.id, id));
+}
+
+// User management functions
+export async function getUsersByCompany(companyId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(users).where(eq(users.companyId, companyId));
+}
+
+export async function getUserById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateUser(id: number, updates: Partial<InsertUser>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(users).set(updates).where(eq(users.id, id));
+}
+
+export async function getUsersByRole(companyId: number, role: string) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(users).where(
+    and(
+      eq(users.companyId, companyId),
+      eq(users.role, role as any)
+    )
+  );
+}
+
+// Audit log functions
+export async function createAuditLog(log: InsertAuditLog) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create audit log: database not available");
+    return;
+  }
+
+  try {
+    await db.insert(auditLogs).values(log);
+  } catch (error) {
+    console.error("[Database] Failed to create audit log:", error);
+  }
+}
+
+export async function getAuditLogs(companyId: number, limit: number = 100) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select()
+    .from(auditLogs)
+    .where(eq(auditLogs.companyId, companyId))
+    .orderBy(desc(auditLogs.createdAt))
+    .limit(limit);
+}
