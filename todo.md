@@ -250,3 +250,10 @@
 - [x] Registrar rotas no App.tsx
 - [x] Investigar mensagens de erro de permissão (são avisos do sistema Manus, não afetam funcionalidade)
 - [x] Testar navegação completa de APRs
+
+
+## Correção de ID Inválido ao Criar APR
+- [x] Investigar erro que retorna NaN como ID da APR criada
+- [x] Verificar procedure aprs.create no backend
+- [x] Corrigir retorno do insertId no routers.ts (Drizzle retorna array)
+- [x] Testar criação de APR e redirecionamento correto

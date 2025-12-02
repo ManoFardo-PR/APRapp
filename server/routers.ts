@@ -393,7 +393,18 @@ export const appRouter = router({
           status: "draft",
         });
 
-        const aprId = Number((result as any).insertId);
+        // Drizzle MySQL2 returns [ResultSetHeader, undefined]
+        // Extract insertId from the first element of the array
+        const insertId = Array.isArray(result) && result[0] ? result[0].insertId : undefined;
+        const aprId = Number(insertId);
+        
+        if (!aprId || isNaN(aprId)) {
+          console.error('[APR Create] Invalid insertId:', insertId, 'result:', result);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Falha ao criar APR: ID inv\u00e1lido retornado",
+          });
+        }
 
         await db.createAuditLog({
           companyId: ctx.user.companyId,
