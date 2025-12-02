@@ -242,3 +242,11 @@
 - [x] Criar página Statistics.tsx com visualização de estatísticas
 - [x] Implementar gráficos e métricas para o dashboard de estatísticas
 - [x] Testar acesso à rota /statistics
+
+
+## Correção de Rotas de Visualização de APRs
+- [x] Criar página AprDetail.tsx para visualização de APR individual (/aprs/:id)
+- [x] Criar página PendingApprovals.tsx para lista de APRs pendentes (/aprs/pending)
+- [x] Registrar rotas no App.tsx
+- [x] Investigar mensagens de erro de permissão (são avisos do sistema Manus, não afetam funcionalidade)
+- [x] Testar navegação completa de APRs

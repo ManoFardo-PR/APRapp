@@ -13,6 +13,8 @@ import GlobalUserManagement from "@/pages/GlobalUserManagement";
 import ManageUsers from "./pages/ManageUsers";
 import AprList from "./pages/AprList";
 import NewApr from "./pages/NewApr";
+import AprDetail from "./pages/AprDetail";
+import PendingApprovals from "./pages/PendingApprovals";
 import Statistics from "./pages/Statistics";
 
 function Router() {
@@ -26,6 +28,8 @@ function Router() {
       <Route path="/company/users" component={ManageUsers} />
       <Route path="/aprs" component={AprList} />
       <Route path="/aprs/new" component={NewApr} />
+      <Route path="/aprs/pending" component={PendingApprovals} />
+      <Route path="/aprs/:id" component={AprDetail} />
       <Route path="/statistics" component={Statistics} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
