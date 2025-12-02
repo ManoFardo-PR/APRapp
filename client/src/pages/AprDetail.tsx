@@ -15,8 +15,22 @@ import {
   MapPin,
   User,
   Calendar,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Edit,
+  Trash2,
+  Send
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -44,6 +58,26 @@ export default function AprDetail() {
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao revisar APR");
+    },
+  });
+
+  const submitForApprovalMutation = trpc.aprs.submitForApproval.useMutation({
+    onSuccess: () => {
+      toast.success("APR enviada para aprova\u00e7\u00e3o");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao enviar APR");
+    },
+  });
+
+  const deleteMutation = trpc.aprs.delete.useMutation({
+    onSuccess: () => {
+      toast.success("APR exclu\u00edda com sucesso");
+      setLocation("/aprs");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao excluir APR");
     },
   });
 
@@ -152,8 +186,61 @@ export default function AprDetail() {
               </p>
             </div>
           </div>
-          <div>
+          <div className="flex items-center gap-2">
             {getStatusBadge(apr.status)}
+            
+            {/* Action buttons for creator */}
+            {apr.createdBy === user.id && apr.status === "draft" && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLocation(`/aprs/${aprId}/edit`)}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Editar
+                </Button>
+                
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => submitForApprovalMutation.mutate({ id: aprId })}
+                  disabled={submitForApprovalMutation.isPending}
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  {submitForApprovalMutation.isPending ? "Enviando..." : "Enviar para Aprova\u00e7\u00e3o"}
+                </Button>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Excluir
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirmar Exclus\u00e3o</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Tem certeza que deseja excluir esta APR? Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteMutation.mutate({ id: aprId })}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Excluir
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            )}
           </div>
         </div>
       </header>

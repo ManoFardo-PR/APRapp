@@ -8,6 +8,8 @@ import { getUsersByCompany, countActiveUsersByCompany, createCompanyUser, update
 import { TRPCError } from "@trpc/server";
 
 import * as aprDb from "./aprDb";
+import { aprImages } from "../drizzle/schema";
+import { eq } from "drizzle-orm";
 import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
 
@@ -561,6 +563,66 @@ export const appRouter = router({
           entityType: "apr",
           entityId: input.id,
           details: {},
+          ipAddress: ctx.req.ip,
+          userAgent: ctx.req.headers["user-agent"] || null,
+        });
+
+        return { success: true };
+      }),
+
+    // Delete APR (only draft status and creator)
+    delete: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user.companyId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Usu\u00e1rio n\u00e3o est\u00e1 associado a uma empresa",
+          });
+        }
+
+        const apr = await aprDb.getAprById(input.id, ctx.user.companyId);
+        if (!apr) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "APR n\u00e3o encontrada",
+          });
+        }
+
+        // Only creator can delete, and only if status is draft
+        if (apr.createdBy !== ctx.user.id) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Apenas o criador pode excluir a APR",
+          });
+        }
+
+        if (apr.status !== "draft") {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Apenas APRs em rascunho podem ser exclu\u00eddas",
+          });
+        }
+
+        // Delete related data first
+        await aprDb.deleteAprResponses(input.id);
+        // Note: Images should also be deleted from S3, but for now we just delete DB records
+        await db.getDb().then(db => {
+          if (db) {
+            return db.delete(aprImages).where(eq(aprImages.aprId, input.id));
+          }
+        });
+
+        // Delete the APR
+        await aprDb.deleteApr(input.id, ctx.user.companyId);
+
+        await db.createAuditLog({
+          companyId: ctx.user.companyId,
+          userId: ctx.user.id,
+          action: "DELETE_APR",
+          entityType: "apr",
+          entityId: input.id,
+          details: { title: apr.title },
           ipAddress: ctx.req.ip,
           userAgent: ctx.req.headers["user-agent"] || null,
         });

@@ -257,3 +257,16 @@
 - [x] Verificar procedure aprs.create no backend
 - [x] Corrigir retorno do insertId no routers.ts (Drizzle retorna array)
 - [x] Testar criação de APR e redirecionamento correto
+
+
+## Funcionalidades de Edição, Exclusão e Envio de APR
+- [x] Implementar procedure aprs.update no backend (já existia)
+- [x] Implementar procedure aprs.delete no backend
+- [x] Implementar procedure aprs.submitForApproval no backend (já existia)
+- [x] Adicionar botão "Editar" na página AprDetail.tsx
+- [x] Adicionar botão "Excluir" com confirmação na página AprDetail.tsx
+- [x] Adicionar botão "Enviar para Aprovação" na página AprDetail.tsx
+- [x] Criar página EditApr.tsx para edição de APR
+- [x] Garantir que apenas o criador pode editar/excluir APR em status draft
+- [x] Visualização de imagens (já implementada)
+- [x] Testar fluxo completo de edição, exclusão e envio
