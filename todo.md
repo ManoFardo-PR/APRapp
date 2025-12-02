@@ -235,3 +235,10 @@
 - [x] Atualizar middleware de permissões para suportar hierarquia (safetyTechProcedure)
 - [x] Atualizar dashboards para mostrar funcionalidades conforme hierarquia
 - [x] Testar fluxo completo de permissões (26 testes passando)
+
+
+## Correção de Rota /statistics
+- [x] Verificar se rota /statistics está registrada no App.tsx
+- [x] Criar página Statistics.tsx com visualização de estatísticas
+- [x] Implementar gráficos e métricas para o dashboard de estatísticas
+- [x] Testar acesso à rota /statistics

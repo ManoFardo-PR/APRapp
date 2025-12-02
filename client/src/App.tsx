@@ -13,6 +13,7 @@ import GlobalUserManagement from "@/pages/GlobalUserManagement";
 import ManageUsers from "./pages/ManageUsers";
 import AprList from "./pages/AprList";
 import NewApr from "./pages/NewApr";
+import Statistics from "./pages/Statistics";
 
 function Router() {
   return (
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/company/users" component={ManageUsers} />
       <Route path="/aprs" component={AprList} />
       <Route path="/aprs/new" component={NewApr} />
+      <Route path="/statistics" component={Statistics} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
