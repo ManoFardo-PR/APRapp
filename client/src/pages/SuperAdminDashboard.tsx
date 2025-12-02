@@ -121,7 +121,10 @@ export default function SuperAdminDashboard() {
               <p className="text-sm text-muted-foreground">{user.name}</p>
             </div>
           </div>
-          <Button variant="outline" onClick={() => logout()}>
+          <Button variant="outline" onClick={async () => {
+            await logout();
+            window.location.href = '/';
+          }}>
             Sair
           </Button>
         </div>
@@ -290,7 +293,7 @@ export default function SuperAdminDashboard() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setLocation(`/empresa/${company.code}`)}
+                        onClick={() => window.open(`/empresa/${company.code}`, '_blank')}
                       >
                         Ver Landing
                       </Button>

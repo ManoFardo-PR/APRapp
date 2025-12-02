@@ -184,3 +184,8 @@
 ## Correção de Hooks
 - [x] Corrigir erro "Rendered fewer hooks than expected" no Dashboard
 - [x] Mover todos os hooks para antes do early return
+
+
+## Correções de Navegação
+- [x] Corrigir botão "Ver Landing" no dashboard superadmin
+- [x] Corrigir redirecionamento após logout para landing page principal
