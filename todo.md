@@ -179,3 +179,8 @@
 ## Correção de Erros de Render
 - [x] Corrigir erro de setLocation no render do Dashboard
 - [x] Usar useEffect para navegação condicional
+
+
+## Correção de Hooks
+- [x] Corrigir erro "Rendered fewer hooks than expected" no Dashboard
+- [x] Mover todos os hooks para antes do early return

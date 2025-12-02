@@ -12,6 +12,16 @@ export default function Dashboard() {
   const { t } = useLanguage();
   const [, setLocation] = useLocation();
 
+  // All hooks must be called before any early returns
+  const { data: stats, isLoading: statsLoading } = trpc.aprs.getStats.useQuery(
+    undefined,
+    { enabled: !!user && user.role !== "superadmin" }
+  );
+  const { data: myAprs, isLoading: aprsLoading } = trpc.aprs.list.useQuery(
+    { userId: user?.id },
+    { enabled: !!user && user.role !== "superadmin" }
+  );
+
   // Redirect superadmin to dedicated dashboard
   useEffect(() => {
     if (user && user.role === "superadmin") {
@@ -23,15 +33,6 @@ export default function Dashboard() {
   if (user && user.role === "superadmin") {
     return null;
   }
-
-  const { data: stats, isLoading: statsLoading } = trpc.aprs.getStats.useQuery(
-    undefined,
-    { enabled: !!user && user.role !== "superadmin" }
-  );
-  const { data: myAprs, isLoading: aprsLoading } = trpc.aprs.list.useQuery(
-    { userId: user?.id },
-    { enabled: !!user && user.role !== "superadmin" }
-  );
 
   if (!user) {
     return (
