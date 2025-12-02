@@ -159,3 +159,10 @@
 - [x] Implementar sistema de roteamento por código de empresa
 - [x] Adicionar login para admin, técnico e usuários da empresa
 - [x] Personalizar branding por empresa na landing page
+
+
+## Correções de Autenticação
+- [x] Investigar problema de redirecionamento após login
+- [x] Corrigir erro 403 do Google OAuth
+- [x] Verificar fluxo de callback OAuth
+- [x] Testar login de superadmin
