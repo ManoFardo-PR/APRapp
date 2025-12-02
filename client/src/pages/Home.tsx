@@ -19,7 +19,8 @@ export default function Home() {
   }
 
   if (user) {
-    return <Link href="/dashboard"><a /></Link>;
+    window.location.href = "/dashboard";
+    return null;
   }
 
   return (

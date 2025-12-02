@@ -134,3 +134,18 @@
 - [x] Implementar estados de loading e erro
 - [x] Adicionar feedback visual para ações do usuário
 - [x] Implementar validação de formulários em tempo real
+
+
+## Ajustes para Modelo de APR Fornecido
+- [x] Analisar estrutura do modelo Excel fornecido
+- [ ] Atualizar schema do banco para incluir novos campos do modelo
+- [x] Modificar análise da IA para focar em NRs brasileiras específicas
+- [ ] Implementar geração de relatório Excel no formato do modelo
+- [x] Implementar geração de PDF no formato do modelo
+- [ ] Adicionar campos de comunicação (quem foi comunicado)
+- [ ] Adicionar seção de trabalhos especiais de risco (PT's vinculadas)
+- [ ] Atualizar lista de EPIs para formato do modelo
+- [ ] Implementar matriz de risco (P x S = NR)
+- [ ] Adicionar campos de metodologia de execução passo a passo
+- [ ] Implementar análise de perigos e medidas de controle específicas
+- [ ] Atualizar interface para capturar todos os campos do novo modelo

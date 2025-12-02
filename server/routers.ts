@@ -587,9 +587,9 @@ export const appRouter = router({
           language
         );
 
-        // Update APR with AI analysis
+        // Update APR with AI analysis (convert to compatible format)
         await aprDb.updateApr(input.id, ctx.user.companyId, {
-          aiAnalysis: analysis,
+          aiAnalysis: analysis as any,
         });
 
         await db.createAuditLog({
@@ -604,6 +604,80 @@ export const appRouter = router({
         });
 
         return { success: true, analysis };
+      }),
+
+    // Generate PDF report
+    generatePdfReport: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user.companyId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Usuário não está associado a uma empresa",
+          });
+        }
+
+        const apr = await aprDb.getAprById(input.id, ctx.user.companyId);
+        if (!apr) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "APR não encontrada",
+          });
+        }
+
+        const images = await aprDb.getAprImages(input.id);
+        const company = await db.getCompanyById(ctx.user.companyId);
+        const creator = await db.getUserById(apr.createdBy);
+        
+        let approver = null;
+        if (apr.approvedBy) {
+          approver = await db.getUserById(apr.approvedBy);
+        }
+
+        // Get user language
+        const user = await db.getUserById(ctx.user.id);
+        const language = user?.language || "pt-BR";
+
+        // Import report module
+        const { generateAprPdfReport } = await import("./aprReport");
+
+        // Generate PDF
+        const pdfBuffer = await generateAprPdfReport(
+          {
+            apr,
+            images,
+            analysis: apr.aiAnalysis as any,
+            company: {
+              name: company?.name || "",
+              code: company?.code || "",
+            },
+            creator: {
+              name: creator?.name || "",
+              email: creator?.email || "",
+            },
+            approver: approver ? {
+              name: approver.name || "",
+              email: approver.email || "",
+            } : undefined,
+          },
+          language
+        );
+
+        // Convert buffer to base64 for transmission
+        const pdfBase64 = pdfBuffer.toString('base64');
+
+        await db.createAuditLog({
+          companyId: ctx.user.companyId,
+          userId: ctx.user.id,
+          action: "GENERATE_APR_PDF",
+          entityType: "apr",
+          entityId: input.id,
+          details: {},
+          ipAddress: ctx.req.ip,
+          userAgent: ctx.req.headers["user-agent"] || null,
+        });
+
+        return { success: true, pdfBase64 };
       }),
   }),
 });
