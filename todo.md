@@ -195,3 +195,15 @@
 - [x] Configurar sistema de login para aceitar apenas Google
 - [x] Modificar getLoginUrl para forçar provedor Google
 - [x] Atualizar todas as páginas que usam login
+
+
+## Gestão de Usuários para Company Admin
+- [x] Remover restrição de provedor Google (permitir todos os logins)
+- [x] Criar procedures tRPC para gestão - [x] Implementar queries no db.ts para usuários
+- [x] Criar página ManageUsers.tsx com lista de usuários
+- [x] Implementar modal de adicionar usuário
+- [x] Implementar modal de editar usuário
+- [x] Adicionar toggle de ativar/desativar usuário
+- [x] Adicionar filtros (perfil, status, busca)
+- [x] Adicionar card de estatísticas de usuários
+- [x] Adicionar navegação para página no Dashboard Testar fluxo completo de gestão

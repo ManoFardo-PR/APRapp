@@ -1,7 +1,7 @@
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
 // Generate login URL at runtime so redirect URI reflects the current origin.
-// Force Google OAuth only to avoid Microsoft login issues
+// Allows all OAuth providers (Google, Microsoft, Apple) and email login
 export const getLoginUrl = () => {
   const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
   const appId = import.meta.env.VITE_APP_ID;
@@ -13,7 +13,7 @@ export const getLoginUrl = () => {
   url.searchParams.set("redirectUri", redirectUri);
   url.searchParams.set("state", state);
   url.searchParams.set("type", "signIn");
-  url.searchParams.set("provider", "google"); // Force Google OAuth only
+  // No provider restriction - allows all login methods
 
   return url.toString();
 };

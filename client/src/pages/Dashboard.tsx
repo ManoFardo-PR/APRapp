@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link, useLocation } from "wouter";
-import { FileText, Clock, CheckCircle, XCircle, Plus } from "lucide-react";
+import { FileText, Clock, CheckCircle, XCircle, Plus, Settings } from "lucide-react";
 import { useEffect } from "react";
 
 export default function Dashboard() {
@@ -140,9 +140,10 @@ export default function Dashboard() {
 
           {isAdmin && (
             <div className="grid gap-4 md:grid-cols-2">
-              <Link href="/users">
+              <Link href="/admin/users">
                 <Button className="w-full" variant="outline">
-                  {t("nav.users")}
+                  <Settings className="mr-2 h-4 w-4" />
+                  Gerenciar Usuários
                 </Button>
               </Link>
               <Link href="/statistics">

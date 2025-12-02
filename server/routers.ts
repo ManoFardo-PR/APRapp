@@ -4,6 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure, adminProcedure, superadminProcedure } from "./_core/trpc";
 import { z } from "zod";
 import * as db from "./db";
+import { getUsersByCompany, countActiveUsersByCompany, createCompanyUser, updateCompanyUser, getCompanyById, getUserById, createAuditLog } from "./db";
 import { TRPCError } from "@trpc/server";
 
 import * as aprDb from "./aprDb";
@@ -112,6 +113,71 @@ export const appRouter = router({
       }
 
       return await db.getUsersByCompany(ctx.user.companyId);
+    }),
+
+    // Create new user (admin only)
+    create: adminProcedure
+      .input(z.object({
+        email: z.string().email(),
+        name: z.string().min(3),
+        role: z.enum(["company_admin", "safety_tech", "requester"]),
+        language: z.enum(["pt-BR", "en-US"]).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (!ctx.user.companyId) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Usuário não está associado a uma empresa" });
+        }
+
+        // Check user limit
+        const company = await getCompanyById(ctx.user.companyId);
+        if (!company) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Empresa não encontrada" });
+        }
+
+        const activeCount = await countActiveUsersByCompany(ctx.user.companyId);
+        if (activeCount >= company.maxUsers) {
+          throw new TRPCError({ 
+            code: "BAD_REQUEST", 
+            message: `Limite de usuários atingido (${activeCount}/${company.maxUsers})` 
+          });
+        }
+
+        await createCompanyUser({
+          ...input,
+          companyId: ctx.user.companyId,
+        });
+
+        // Log audit
+        await createAuditLog({
+          companyId: ctx.user.companyId,
+          userId: ctx.user.id,
+          action: "CREATE_USER",
+          entityType: "user",
+          entityId: null,
+          details: { email: input.email, role: input.role },
+          ipAddress: ctx.req.ip,
+          userAgent: ctx.req.headers["user-agent"] || null,
+        });
+
+        return { success: true };
+      }),
+
+    // Get user stats
+    stats: adminProcedure.query(async ({ ctx }) => {
+      if (!ctx.user.companyId) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Usuário não está associado a uma empresa" });
+      }
+
+      const company = await getCompanyById(ctx.user.companyId);
+      const activeCount = await countActiveUsersByCompany(ctx.user.companyId);
+      const allUsers = await getUsersByCompany(ctx.user.companyId);
+
+      return {
+        activeUsers: activeCount,
+        totalUsers: allUsers.length,
+        userLimit: company?.maxUsers || 0,
+        percentageUsed: company?.maxUsers ? Math.round((activeCount / company.maxUsers) * 100) : 0,
+      };
     }),
 
     // Update user (admin can update users in their company)

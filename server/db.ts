@@ -216,3 +216,80 @@ export async function getAuditLogs(companyId: number, limit: number = 100) {
     .orderBy(desc(auditLogs.createdAt))
     .limit(limit);
 }
+
+
+// User management queries
+export async function countActiveUsersByCompany(companyId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot count users: database not available");
+    return 0;
+  }
+
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.companyId, companyId));
+  
+  return result.filter(u => u.isActive).length;
+}
+
+export async function createCompanyUser(data: {
+  email: string;
+  name: string;
+  companyId: number;
+  role: "company_admin" | "safety_tech" | "requester";
+  language?: "pt-BR" | "en-US";
+}) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  // Check if email already exists in this company
+  const existing = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, data.email))
+    .limit(1);
+
+  if (existing.length > 0 && existing[0]?.companyId === data.companyId) {
+    throw new Error("Email já cadastrado nesta empresa");
+  }
+
+  const result = await db.insert(users).values({
+    email: data.email,
+    name: data.name,
+    companyId: data.companyId,
+    role: data.role,
+    language: data.language || "pt-BR",
+    isActive: true,
+    openId: `pending-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // Temporary until first login
+  });
+
+  return result;
+}
+
+export async function updateCompanyUser(userId: number, data: {
+  name?: string;
+  role?: "company_admin" | "safety_tech" | "requester";
+  language?: "pt-BR" | "en-US";
+  isActive?: boolean;
+}) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const updateData: Partial<InsertUser> = {};
+  if (data.name !== undefined) updateData.name = data.name;
+  if (data.role !== undefined) updateData.role = data.role;
+  if (data.language !== undefined) updateData.language = data.language;
+  if (data.isActive !== undefined) updateData.isActive = data.isActive;
+  updateData.updatedAt = new Date();
+
+  await db
+    .update(users)
+    .set(updateData)
+    .where(eq(users.id, userId));
+}

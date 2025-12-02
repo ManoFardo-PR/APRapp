@@ -49,7 +49,7 @@ export default function LandingMain() {
               </p>
               <a href={getLoginUrl()}>
                 <Button className="w-full">
-                  Login com Google
+                  Fazer Login
                 </Button>
               </a>
             </div>
