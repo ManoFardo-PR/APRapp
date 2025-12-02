@@ -149,3 +149,13 @@
 - [ ] Adicionar campos de metodologia de execução passo a passo
 - [ ] Implementar análise de perigos e medidas de controle específicas
 - [ ] Atualizar interface para capturar todos os campos do novo modelo
+
+
+## Landing Pages
+- [x] Criar landing page principal APRFix (verde segurança, chamativa)
+- [x] Adicionar login discreto para superadmin no canto superior
+- [x] Adicionar botão central para acessar sistema da empresa
+- [x] Criar landing page personalizada por empresa (com código)
+- [x] Implementar sistema de roteamento por código de empresa
+- [x] Adicionar login para admin, técnico e usuários da empresa
+- [x] Personalizar branding por empresa na landing page

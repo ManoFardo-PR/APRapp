@@ -5,7 +5,8 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
-import Home from "./pages/Home";
+import LandingMain from "./pages/LandingMain";
+import LandingCompany from "./pages/LandingCompany";
 import Dashboard from "./pages/Dashboard";
 import AprList from "./pages/AprList";
 import NewApr from "./pages/NewApr";
@@ -13,7 +14,8 @@ import NewApr from "./pages/NewApr";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={LandingMain} />
+      <Route path="/empresa/:code" component={LandingCompany} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/aprs" component={AprList} />
       <Route path="/aprs/new" component={NewApr} />
