@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link, useLocation } from "wouter";
 import { FileText, Clock, CheckCircle, XCircle, Plus } from "lucide-react";
+import { useEffect } from "react";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -12,14 +13,25 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
 
   // Redirect superadmin to dedicated dashboard
+  useEffect(() => {
+    if (user && user.role === "superadmin") {
+      setLocation("/admin/dashboard");
+    }
+  }, [user, setLocation]);
+
+  // Don't render anything for superadmin while redirecting
   if (user && user.role === "superadmin") {
-    setLocation("/admin/dashboard");
     return null;
   }
-  const { data: stats, isLoading: statsLoading } = trpc.aprs.getStats.useQuery();
-  const { data: myAprs, isLoading: aprsLoading } = trpc.aprs.list.useQuery({ 
-    userId: user?.id 
-  });
+
+  const { data: stats, isLoading: statsLoading } = trpc.aprs.getStats.useQuery(
+    undefined,
+    { enabled: !!user && user.role !== "superadmin" }
+  );
+  const { data: myAprs, isLoading: aprsLoading } = trpc.aprs.list.useQuery(
+    { userId: user?.id },
+    { enabled: !!user && user.role !== "superadmin" }
+  );
 
   if (!user) {
     return (

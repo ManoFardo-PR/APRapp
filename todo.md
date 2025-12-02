@@ -174,3 +174,8 @@
 - [x] Adicionar formulário de criação de empresa
 - [x] Listar todas as empresas cadastradas
 - [x] Permitir edição de empresas (nome, limites, status)
+
+
+## Correção de Erros de Render
+- [x] Corrigir erro de setLocation no render do Dashboard
+- [x] Usar useEffect para navegação condicional
