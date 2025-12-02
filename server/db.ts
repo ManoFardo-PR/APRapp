@@ -365,3 +365,15 @@ export async function findCompanyByAdminEmail(email: string) {
 
   return result.length > 0 ? result[0] : null;
 }
+
+
+export async function getAllUsers() {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get users: database not available");
+    return [];
+  }
+
+  const result = await db.select().from(users);
+  return result;
+}

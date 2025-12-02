@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Building2, Users, Shield, Plus, Edit, CheckCircle, XCircle, Loader2, Mail, Trash2 } from "lucide-react";
+import { Building2, Users, Shield, Plus, Edit, CheckCircle, XCircle, Loader2, Mail, Trash2, UserCog } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { useLocation } from "wouter";
@@ -231,13 +231,18 @@ export default function SuperAdminDashboard() {
                 <CardTitle>Gestão de Empresas</CardTitle>
                 <CardDescription>Crie e gerencie empresas cadastradas no sistema</CardDescription>
               </div>
-              <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nova Empresa
-                  </Button>
-                </DialogTrigger>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setLocation("/admin/users")}>
+                  <UserCog className="h-4 w-4 mr-2" />
+                  Todos os Usuários
+                </Button>
+                <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Nova Empresa
+                    </Button>
+                  </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Criar Nova Empresa</DialogTitle>
@@ -295,6 +300,7 @@ export default function SuperAdminDashboard() {
                   </div>
                 </DialogContent>
               </Dialog>
+              </div>
             </div>
           </CardHeader>
           <CardContent>

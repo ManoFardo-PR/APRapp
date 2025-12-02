@@ -60,3 +60,26 @@ export const superadminProcedure = t.procedure.use(
     });
   }),
 );
+
+/**
+ * Hierarquia de Permissões Cumulativas:
+ * - company_admin: pode criar APR + aprovar APR + gerenciar usuários
+ * - safety_tech: pode criar APR + aprovar APR
+ * - requester: pode apenas criar APR
+ */
+export const safetyTechProcedure = t.procedure.use(
+  t.middleware(async opts => {
+    const { ctx, next } = opts;
+
+    if (!ctx.user || !['superadmin', 'company_admin', 'safety_tech'].includes(ctx.user.role)) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Apenas técnicos de segurança ou superiores podem acessar este recurso" });
+    }
+
+    return next({
+      ctx: {
+        ...ctx,
+        user: ctx.user,
+      },
+    });
+  }),
+);

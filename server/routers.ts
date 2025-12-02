@@ -1,7 +1,7 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router, protectedProcedure, adminProcedure, superadminProcedure } from "./_core/trpc";
+import { publicProcedure, router, protectedProcedure, adminProcedure, superadminProcedure, safetyTechProcedure } from "./_core/trpc";
 import { z } from "zod";
 import * as db from "./db";
 import { getUsersByCompany, countActiveUsersByCompany, createCompanyUser, updateCompanyUser, getCompanyById, getUserById, createAuditLog, addCompanyAdminEmail, removeCompanyAdminEmail, getCompanyAdminEmails } from "./db";
@@ -321,6 +321,48 @@ export const appRouter = router({
         await db.updateUser(ctx.user.id, input);
         return { success: true };
       }),
+
+    // List all users (superadmin only)
+    listAll: superadminProcedure.query(async () => {
+      return await db.getAllUsers();
+    }),
+
+    // Update any user globally (superadmin only)
+    updateGlobal: superadminProcedure
+      .input(z.object({
+        userId: z.number().int().positive(),
+        role: z.enum(["superadmin", "company_admin", "safety_tech", "requester"]).optional(),
+        preferredLanguage: z.enum(["pt-BR", "en-US"]).optional(),
+        isActive: z.boolean().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const { userId, ...updates } = input;
+
+        // Get target user
+        const targetUser = await db.getUserById(userId);
+        if (!targetUser) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Usuário não encontrado",
+          });
+        }
+
+        await db.updateUser(userId, updates);
+
+        // Log audit
+        await db.createAuditLog({
+          companyId: 0, // System level
+          userId: ctx.user.id,
+          action: "UPDATE_USER_GLOBAL",
+          entityType: "user",
+          entityId: userId,
+          details: updates,
+          ipAddress: ctx.req.ip,
+          userAgent: ctx.req.headers["user-agent"] || null,
+        });
+
+        return { success: true };
+      }),
   }),
 
   // APR management
@@ -515,8 +557,9 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    // Approve/Reject APR (safety_tech only)
-    reviewApr: protectedProcedure
+    // Approve/Reject APR (safety_tech, company_admin, superadmin)
+    // Hierarquia cumulativa: safety_tech+ pode aprovar
+    reviewApr: safetyTechProcedure
       .input(z.object({
         id: z.number().int().positive(),
         approved: z.boolean(),
@@ -527,13 +570,6 @@ export const appRouter = router({
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Usuário não está associado a uma empresa",
-          });
-        }
-
-        if (ctx.user.role !== "safety_tech" && ctx.user.role !== "company_admin" && ctx.user.role !== "superadmin") {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "Apenas técnicos de segurança podem aprovar APRs",
           });
         }
 

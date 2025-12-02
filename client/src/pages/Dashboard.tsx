@@ -42,6 +42,14 @@ export default function Dashboard() {
     );
   }
 
+  // Hierarquia cumulativa de permissões:
+  // company_admin: criar APR + aprovar APR + gerenciar usuários
+  // safety_tech: criar APR + aprovar APR
+  // requester: criar APR
+  const canCreateApr = true; // Todos podem criar
+  const canApproveApr = user.role === "safety_tech" || user.role === "company_admin" || user.role === "superadmin";
+  const canManageUsers = user.role === "company_admin" || user.role === "superadmin";
+  
   const isRequester = user.role === "requester";
   const isSafetyTech = user.role === "safety_tech";
   const isAdmin = user.role === "company_admin" || user.role === "superadmin";
@@ -115,21 +123,21 @@ export default function Dashboard() {
           <CardTitle>{t("nav.dashboard")}</CardTitle>
           <CardDescription>
             {isRequester && "Crie e gerencie suas APRs"}
-            {isSafetyTech && "Aprove e revise APRs pendentes"}
-            {isAdmin && "Gerencie usuários e visualize estatísticas"}
+            {isSafetyTech && "Crie APRs e aprove solicitações pendentes"}
+            {isAdmin && "Crie APRs, aprove solicitações e gerencie usuários"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {isRequester && (
-            <Link href="/aprs/new">
-              <Button className="w-full" size="lg">
-                <Plus className="mr-2 h-4 w-4" />
-                {t("apr.new")}
-              </Button>
-            </Link>
-          )}
+          {/* Todos podem criar APR */}
+          <Link href="/aprs/new">
+            <Button className="w-full" size="lg">
+              <Plus className="mr-2 h-4 w-4" />
+              {t("apr.new")}
+            </Button>
+          </Link>
 
-          {isSafetyTech && (
+          {/* Safety_tech e superiores podem aprovar */}
+          {canApproveApr && (
             <Link href="/aprs/pending">
               <Button className="w-full" size="lg" variant="outline">
                 <Clock className="mr-2 h-4 w-4" />
@@ -138,9 +146,10 @@ export default function Dashboard() {
             </Link>
           )}
 
-          {isAdmin && (
+          {/* Apenas company_admin pode gerenciar usuários */}
+          {canManageUsers && (
             <div className="grid gap-4 md:grid-cols-2">
-              <Link href="/admin/users">
+              <Link href="/company/users">
                 <Button className="w-full" variant="outline">
                   <Settings className="mr-2 h-4 w-4" />
                   Gerenciar Usuários

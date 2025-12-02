@@ -222,3 +222,16 @@
 - [x] Adicionar procedures faltantes (getAdminEmails, addAdminEmail, removeAdminEmail)
 - [x] Mover procedures do router users para router companies
 - [x] Testar funcionalidade completa de gestão de emails de admin
+
+
+## Gestão Global de Usuários e Hierarquia de Permissões
+- [x] Criar página de gestão global de usuários para superadmin
+- [x] Adicionar botão no dashboard superadmin para acessar gestão global
+- [x] Implementar procedure tRPC updateGlobal para edição global de usuários
+- [x] Implementar hierarquia de permissões cumulativas:
+  - [x] Company_admin pode criar APR, aprovar APR e gerenciar usuários
+  - [x] Safety_tech pode criar APR e aprovar APR
+  - [x] Requester pode apenas criar APR
+- [x] Atualizar middleware de permissões para suportar hierarquia (safetyTechProcedure)
+- [x] Atualizar dashboards para mostrar funcionalidades conforme hierarquia
+- [x] Testar fluxo completo de permissões (26 testes passando)

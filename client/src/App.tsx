@@ -8,7 +8,8 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import LandingMain from "./pages/LandingMain";
 import LandingCompany from "./pages/LandingCompany";
 import Dashboard from "./pages/Dashboard";
-import SuperAdminDashboard from "./pages/SuperAdminDashboard";
+import SuperAdminDashboard from "@/pages/SuperAdminDashboard";
+import GlobalUserManagement from "@/pages/GlobalUserManagement";
 import ManageUsers from "./pages/ManageUsers";
 import AprList from "./pages/AprList";
 import NewApr from "./pages/NewApr";
@@ -20,7 +21,8 @@ function Router() {
       <Route path="/empresa/:code" component={LandingCompany} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/admin/dashboard" component={SuperAdminDashboard} />
-      <Route path="/admin/users" component={ManageUsers} />
+      <Route path="/admin/users" component={GlobalUserManagement} />
+      <Route path="/company/users" component={ManageUsers} />
       <Route path="/aprs" component={AprList} />
       <Route path="/aprs/new" component={NewApr} />
       <Route path="/404" component={NotFound} />
