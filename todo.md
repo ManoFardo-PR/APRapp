@@ -220,4 +220,5 @@
 ## Correção de Procedure getAdminEmails
 - [x] Verificar se getAdminEmails está registrado no router companies
 - [x] Adicionar procedures faltantes (getAdminEmails, addAdminEmail, removeAdminEmail)
+- [x] Mover procedures do router users para router companies
 - [x] Testar funcionalidade completa de gestão de emails de admin
