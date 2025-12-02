@@ -215,3 +215,9 @@
 - [x] Atualizar SuperAdminDashboard para mostrar e gerenciar emails de admin
 - [x] Implementar lógica de auto-associação no callback OAuth
 - [x] Testar fluxo completo de primeiro login com email pré-configurado
+
+
+## Correção de Procedure getAdminEmails
+- [x] Verificar se getAdminEmails está registrado no router companies
+- [x] Adicionar procedures faltantes (getAdminEmails, addAdminEmail, removeAdminEmail)
+- [x] Testar funcionalidade completa de gestão de emails de admin
