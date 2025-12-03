@@ -281,3 +281,17 @@
 - [x] IA analisa riscos visíveis nas fotos e no contexto descrito
 - [x] Retornar sugestões de medidas de controle da IA
 - [x] Testar fluxo completo de criação com imagens e análise IA (30 testes passando)
+
+
+## Botão "Analisar com IA" na Página de Detalhes
+- [x] Adicionar botão "Analisar com IA" no header da página AprDetail.tsx
+- [x] Implementar mutation para chamar procedure analyzeWithAI
+- [x] Mostrar loading durante análise
+- [x] Criar seção de exibição de resultados da análise
+- [x] Exibir riscos identificados em cards (tarefa, perigo, P, S, NR, categoria)
+- [x] Exibir trabalhos especiais com badges de NRs
+- [x] Exibir EPIs obrigatórios em lista
+- [x] Exibir setores a comunicar
+- [x] Exibir resumo executivo da análise
+- [x] Atualizar schema do banco para corresponder ao formato da IA
+- [x] Testar fluxo completo de análise (30 testes passando)

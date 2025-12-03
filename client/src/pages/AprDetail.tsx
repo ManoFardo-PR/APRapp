@@ -18,7 +18,10 @@ import {
   Image as ImageIcon,
   Edit,
   Trash2,
-  Send
+  Send,
+  Sparkles,
+  AlertTriangle,
+  Shield
 } from "lucide-react";
 import {
   AlertDialog,
@@ -78,6 +81,16 @@ export default function AprDetail() {
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao excluir APR");
+    },
+  });
+
+  const analyzeWithAIMutation = trpc.aprs.analyzeWithAI.useMutation({
+    onSuccess: () => {
+      toast.success("An\u00e1lise por IA conclu\u00edda com sucesso");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao analisar APR com IA");
     },
   });
 
@@ -188,6 +201,20 @@ export default function AprDetail() {
           </div>
           <div className="flex items-center gap-2">
             {getStatusBadge(apr.status)}
+            
+            {/* AI Analysis button - available for all users */}
+            {!apr.aiAnalysis && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => analyzeWithAIMutation.mutate({ id: aprId })}
+                disabled={analyzeWithAIMutation.isPending}
+                className="border-purple-500 text-purple-700 hover:bg-purple-50"
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                {analyzeWithAIMutation.isPending ? "Analisando..." : "Analisar com IA"}
+              </Button>
+            )}
             
             {/* Action buttons for creator */}
             {apr.createdBy === user.id && apr.status === "draft" && (
@@ -361,6 +388,161 @@ export default function AprDetail() {
                   </div>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* AI Analysis Results */}
+        {apr.aiAnalysis && (
+          <Card className="border-2 border-purple-200 bg-purple-50/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-purple-600" />
+                Análise por Inteligência Artificial
+              </CardTitle>
+              <CardDescription>
+                Análise automática de riscos baseada nas informações e imagens fornecidas
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Summary */}
+              {apr.aiAnalysis.summary && (
+                <div className="bg-white p-4 rounded-lg border">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Resumo Executivo
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{apr.aiAnalysis.summary}</p>
+                </div>
+              )}
+
+              {/* Risks */}
+              {apr.aiAnalysis.risks && apr.aiAnalysis.risks.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-orange-600" />
+                    Riscos Identificados ({apr.aiAnalysis.risks.length})
+                  </h3>
+                  <div className="space-y-3">
+                    {apr.aiAnalysis.risks.map((risk: any, index: number) => (
+                      <Card key={index} className="bg-white">
+                        <CardContent className="p-4">
+                          <div className="grid gap-3">
+                            <div>
+                              <span className="text-xs font-medium text-muted-foreground">Tarefa</span>
+                              <p className="text-sm font-medium">{risk.task}</p>
+                            </div>
+                            <div>
+                              <span className="text-xs font-medium text-muted-foreground">Perigo</span>
+                              <p className="text-sm">{risk.hazard}</p>
+                            </div>
+                            <div className="grid grid-cols-4 gap-2">
+                              <div>
+                                <span className="text-xs font-medium text-muted-foreground">P</span>
+                                <p className="text-lg font-bold">{risk.probability}</p>
+                              </div>
+                              <div>
+                                <span className="text-xs font-medium text-muted-foreground">S</span>
+                                <p className="text-lg font-bold">{risk.severity}</p>
+                              </div>
+                              <div>
+                                <span className="text-xs font-medium text-muted-foreground">NR</span>
+                                <p className="text-lg font-bold">{risk.riskLevel}</p>
+                              </div>
+                              <div>
+                                <Badge 
+                                  variant={risk.riskLevel <= 2 ? "default" : risk.riskLevel <= 4 ? "secondary" : risk.riskLevel <= 9 ? "destructive" : "destructive"}
+                                  className="mt-1"
+                                >
+                                  {risk.riskCategory}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-xs font-medium text-muted-foreground">Medidas de Controle</span>
+                              <p className="text-sm">{risk.controlMeasures}</p>
+                            </div>
+                            {risk.applicableNRs && risk.applicableNRs.length > 0 && (
+                              <div className="flex gap-1 flex-wrap">
+                                {risk.applicableNRs.map((nr: string, i: number) => (
+                                  <Badge key={i} variant="outline" className="text-xs">
+                                    {nr}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Special Work Permits */}
+              {apr.aiAnalysis.specialWorkPermits && (
+                <div className="bg-white p-4 rounded-lg border">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-blue-600" />
+                    Trabalhos Especiais
+                  </h3>
+                  <div className="flex gap-2 flex-wrap">
+                    {apr.aiAnalysis.specialWorkPermits.nr10_electrical && (
+                      <Badge className="bg-yellow-500">NR-10 Energia Elétrica</Badge>
+                    )}
+                    {apr.aiAnalysis.specialWorkPermits.nr35_height && (
+                      <Badge className="bg-orange-500">NR-35 Trabalho em Altura</Badge>
+                    )}
+                    {apr.aiAnalysis.specialWorkPermits.nr33_confined && (
+                      <Badge className="bg-red-500">NR-33 Espaço Confinado</Badge>
+                    )}
+                    {apr.aiAnalysis.specialWorkPermits.nr12_pressure && (
+                      <Badge className="bg-purple-500">NR-12 Vasos de Pressão</Badge>
+                    )}
+                    {apr.aiAnalysis.specialWorkPermits.nr18_excavation && (
+                      <Badge className="bg-brown-500">NR-18 Escavação</Badge>
+                    )}
+                    {apr.aiAnalysis.specialWorkPermits.nr18_hot_work && (
+                      <Badge className="bg-red-600">NR-18 Trabalho a Quente</Badge>
+                    )}
+                    {apr.aiAnalysis.specialWorkPermits.nr18_lifting && (
+                      <Badge className="bg-blue-500">NR-18 Içamentos</Badge>
+                    )}
+                    {apr.aiAnalysis.specialWorkPermits.others && (
+                      <Badge variant="outline">{apr.aiAnalysis.specialWorkPermits.others}</Badge>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Required PPE */}
+              {apr.aiAnalysis.requiredPPE && apr.aiAnalysis.requiredPPE.length > 0 && (
+                <div className="bg-white p-4 rounded-lg border">
+                  <h3 className="font-semibold mb-3">EPIs Obrigatórios (NR-6)</h3>
+                  <ul className="list-disc list-inside space-y-1">
+                    {apr.aiAnalysis.requiredPPE.map((ppe: string, index: number) => (
+                      <li key={index} className="text-sm">{ppe}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Communication Needs */}
+              {apr.aiAnalysis.communicationNeeds && (
+                <div className="bg-white p-4 rounded-lg border">
+                  <h3 className="font-semibold mb-3">Setores a Comunicar</h3>
+                  <div className="flex gap-2 flex-wrap">
+                    {apr.aiAnalysis.communicationNeeds.management && <Badge variant="secondary">Gerência</Badge>}
+                    {apr.aiAnalysis.communicationNeeds.supervision && <Badge variant="secondary">Supervisão</Badge>}
+                    {apr.aiAnalysis.communicationNeeds.safety && <Badge variant="secondary">Segurança do Trabalho</Badge>}
+                    {apr.aiAnalysis.communicationNeeds.environment && <Badge variant="secondary">Meio Ambiente</Badge>}
+                    {apr.aiAnalysis.communicationNeeds.emergency_brigade && <Badge variant="secondary">Brigada de Emergência</Badge>}
+                    {apr.aiAnalysis.communicationNeeds.security && <Badge variant="secondary">Segurança Patrimonial</Badge>}
+                    {apr.aiAnalysis.communicationNeeds.purchasing && <Badge variant="secondary">Compras</Badge>}
+                    {apr.aiAnalysis.communicationNeeds.hr && <Badge variant="secondary">RH</Badge>}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
