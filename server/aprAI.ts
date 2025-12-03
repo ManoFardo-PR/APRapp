@@ -131,10 +131,9 @@ ${activityDescription}
 RESPOSTAS DO QUESTIONÁRIO:
 ${responsesContext}
 
-INFORMAÇÕES SOBRE IMAGENS:
-${imageContext}
+${images.length > 0 ? `IMAGENS ANEXADAS: ${images.length} imagens do local de trabalho estão anexadas abaixo. Analise-as cuidadosamente para identificar riscos visíveis, condições inseguras, EPIs presentes/ausentes, equipamentos, e qualquer violação das NRs.` : 'Nenhuma imagem foi fornecida.'}
 
-Gere uma análise estruturada identificando todas as tarefas, perigos, riscos (P, S, NR), medidas de controle e NRs aplicáveis.`
+Gere uma análise estruturada identificando todas as tarefas, perigos, riscos (P, S, NR), medidas de controle e NRs aplicáveis. Considere tanto as informações textuais quanto os riscos visíveis nas imagens.`
     : `Analyze the following work activity and generate a complete PRA according to Brazilian standards:
 
 ACTIVITY DESCRIPTION:
@@ -143,16 +142,33 @@ ${activityDescription}
 QUESTIONNAIRE RESPONSES:
 ${responsesContext}
 
-IMAGE INFORMATION:
-${imageContext}
+${images.length > 0 ? `ATTACHED IMAGES: ${images.length} workplace images are attached below. Analyze them carefully to identify visible risks, unsafe conditions, present/absent PPE, equipment, and any NR violations.` : 'No images were provided.'}
 
-Generate a structured analysis identifying all tasks, hazards, risks (P, S, NR), control measures, and applicable NRs.`;
+Generate a structured analysis identifying all tasks, hazards, risks (P, S, NR), control measures, and applicable NRs. Consider both textual information and visible risks in the images.`;
 
   try {
+    // Build message content with images
+    const userContent: any[] = [
+      { type: "text", text: userPrompt },
+    ];
+
+    // Add images to the message
+    if (images.length > 0) {
+      for (const img of images) {
+        userContent.push({
+          type: "image_url",
+          image_url: {
+            url: img.imageUrl,
+            detail: "high",
+          },
+        });
+      }
+    }
+
     const response = await invokeLLM({
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
+        { role: "user", content: userContent },
       ],
       response_format: {
         type: "json_schema",

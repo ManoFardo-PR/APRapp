@@ -270,3 +270,14 @@
 - [x] Garantir que apenas o criador pode editar/excluir APR em status draft
 - [x] Visualização de imagens (já implementada)
 - [x] Testar fluxo completo de edição, exclusão e envio
+
+
+## Upload de Imagens e Análise por IA
+- [x] Modificar procedure aprs.create para aceitar imagens em base64
+- [x] Implementar upload de imagens para S3 no backend
+- [x] Salvar URLs das imagens na tabela apr_images
+- [x] Modificar NewApr.tsx para enviar imagens junto com dados da APR
+- [x] Implementar análise por IA que recebe texto + imagens (aprAI.ts)
+- [x] IA analisa riscos visíveis nas fotos e no contexto descrito
+- [x] Retornar sugestões de medidas de controle da IA
+- [x] Testar fluxo completo de criação com imagens e análise IA (30 testes passando)

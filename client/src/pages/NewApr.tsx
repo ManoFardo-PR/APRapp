@@ -62,6 +62,10 @@ export default function NewApr() {
       description,
       location,
       activityDescription,
+      images: images.map((img, index) => ({
+        data: img,
+        caption: `Imagem ${index + 1}`,
+      })),
     });
   };
 

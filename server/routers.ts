@@ -376,6 +376,10 @@ export const appRouter = router({
         description: z.string().min(1),
         location: z.string().optional(),
         activityDescription: z.string().min(1),
+        images: z.array(z.object({
+          data: z.string(), // base64 image data
+          caption: z.string().optional(),
+        })).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         if (!ctx.user.companyId) {
@@ -408,13 +412,39 @@ export const appRouter = router({
           });
         }
 
+        // Upload images to S3 and save to database
+        if (input.images && input.images.length > 0) {
+          for (let i = 0; i < input.images.length; i++) {
+            const img = input.images[i];
+            
+            // Convert base64 to buffer
+            const base64Data = img.data.replace(/^data:image\/\w+;base64,/, "");
+            const buffer = Buffer.from(base64Data, "base64");
+            
+            // Generate unique filename
+            const fileKey = `apr-images/${ctx.user.companyId}/${aprId}/${nanoid()}.jpg`;
+            
+            // Upload to S3
+            const { url } = await storagePut(fileKey, buffer, "image/jpeg");
+            
+            // Save to database
+            await aprDb.addAprImage({
+              aprId,
+              imageUrl: url,
+              imageKey: fileKey,
+              caption: img.caption,
+              order: i + 1,
+            });
+          }
+        }
+
         await db.createAuditLog({
           companyId: ctx.user.companyId,
           userId: ctx.user.id,
           action: "CREATE_APR",
           entityType: "apr",
           entityId: aprId,
-          details: { title: input.title },
+          details: { title: input.title, imageCount: input.images?.length || 0 },
           ipAddress: ctx.req.ip,
           userAgent: ctx.req.headers["user-agent"] || null,
         });
