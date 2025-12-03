@@ -295,3 +295,11 @@
 - [x] Exibir resumo executivo da análise
 - [x] Atualizar schema do banco para corresponder ao formato da IA
 - [x] Testar fluxo completo de análise (30 testes passando)
+
+
+## Correção de Erro ao Analisar APR com IA
+- [x] Investigar logs do servidor para identificar causa do erro
+- [x] Verificar se APR tem imagens associadas
+- [x] Verificar se procedure analyzeWithAI está funcionando corretamente
+- [x] Corrigir erro identificado (JSON Schema enum com números)
+- [x] Testar análise de APR novamente (funcionando perfeitamente)

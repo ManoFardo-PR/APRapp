@@ -185,8 +185,8 @@ Generate a structured analysis identifying all tasks, hazards, risks (P, S, NR),
                   properties: {
                     task: { type: "string", description: isPortuguese ? "Tarefa/etapa da atividade" : "Task/step of activity" },
                     hazard: { type: "string", description: isPortuguese ? "Perigo existente" : "Existing hazard" },
-                    probability: { type: "integer", enum: [1, 2, 3, 4], description: "P" },
-                    severity: { type: "integer", enum: [1, 2, 3, 4], description: "S" },
+                    probability: { type: "integer", minimum: 1, maximum: 4, description: "P" },
+                    severity: { type: "integer", minimum: 1, maximum: 4, description: "S" },
                     controlMeasures: { type: "string", description: isPortuguese ? "Medidas de controle específicas" : "Specific control measures" },
                     applicableNRs: {
                       type: "array",
@@ -245,8 +245,14 @@ Generate a structured analysis identifying all tasks, hazards, risks (P, S, NR),
       },
     });
 
+    if (!response || !response.choices || response.choices.length === 0) {
+      console.error("[APR AI] Invalid response structure:", response);
+      throw new Error("Invalid response from AI: no choices returned");
+    }
+
     const content = response.choices[0]?.message?.content;
     if (!content || typeof content !== 'string') {
+      console.error("[APR AI] No content in response:", response.choices[0]);
       throw new Error("No response from AI");
     }
 
