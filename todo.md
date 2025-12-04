@@ -272,34 +272,15 @@
 - [x] Testar fluxo completo de edição, exclusão e envio
 
 
-## Upload de Imagens e Análise por IA
-- [x] Modificar procedure aprs.create para aceitar imagens em base64
-- [x] Implementar upload de imagens para S3 no backend
-- [x] Salvar URLs das imagens na tabela apr_images
-- [x] Modificar NewApr.tsx para enviar imagens junto com dados da APR
-- [x] Implementar análise por IA que recebe texto + imagens (aprAI.ts)
-- [x] IA analisa riscos visíveis nas fotos e no contexto descrito
-- [x] Retornar sugestões de medidas de controle da IA
-- [x] Testar fluxo completo de criação com imagens e análise IA (30 testes passando)
-
-
-## Botão "Analisar com IA" na Página de Detalhes
-- [x] Adicionar botão "Analisar com IA" no header da página AprDetail.tsx
-- [x] Implementar mutation para chamar procedure analyzeWithAI
-- [x] Mostrar loading durante análise
-- [x] Criar seção de exibição de resultados da análise
-- [x] Exibir riscos identificados em cards (tarefa, perigo, P, S, NR, categoria)
-- [x] Exibir trabalhos especiais com badges de NRs
-- [x] Exibir EPIs obrigatórios em lista
-- [x] Exibir setores a comunicar
-- [x] Exibir resumo executivo da análise
-- [x] Atualizar schema do banco para corresponder ao formato da IA
-- [x] Testar fluxo completo de análise (30 testes passando)
-
-
-## Correção de Erro ao Analisar APR com IA
-- [x] Investigar logs do servidor para identificar causa do erro
-- [x] Verificar se APR tem imagens associadas
-- [x] Verificar se procedure analyzeWithAI está funcionando corretamente
-- [x] Corrigir erro identificado (JSON Schema enum com números)
-- [x] Testar análise de APR novamente (funcionando perfeitamente)
+## Geração de PDF e Melhorias de Navegação
+- [x] Criar procedure backend para gerar PDF da APR (já existe generatePdfReport)
+- [x] Adicionar botão "Gerar PDF" na página AprDetail.tsx
+- [x] Adicionar botão "Gerar PDF" na página EditApr.tsx
+- [ ] Adicionar botão "Gerar PDF" na página PendingApprovals.tsx (opcional)
+- [x] Implementar geração de PDF com todas as informações da APR (aprReport.ts)
+- [x] Incluir análise da IA no PDF (se existir)
+- [x] Incluir imagens no PDF
+- [x] Adicionar link "Voltar ao Dashboard" na página AprDetail.tsx
+- [x] Adicionar link "Voltar ao Dashboard" em páginas principais (AprDetail, EditApr)
+- [x] Configurar redirecionamento automático para /dashboard ao invés de / para company_admin logado
+- [ ] Testar fluxo completo de navegação e geração de PDF

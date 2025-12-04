@@ -9,7 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useLocation, useRoute } from "wouter";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Download, Home } from "lucide-react";
 
 export default function EditApr() {
   const { user } = useAuth();
@@ -44,6 +44,30 @@ export default function EditApr() {
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao atualizar APR");
+    },
+  });
+
+  const generatePDFMutation = trpc.aprs.generatePdfReport.useMutation({
+    onSuccess: (result) => {
+      const byteCharacters = atob(result.pdfBase64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `APR-${aprId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success("PDF gerado com sucesso");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao gerar PDF");
     },
   });
 
@@ -164,13 +188,32 @@ export default function EditApr() {
             Atualize as informações da Análise Preliminar de Risco
           </p>
         </div>
-        <Button
-          variant="ghost"
-          onClick={() => setLocation(`/aprs/${aprId}`)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Cancelar
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => generatePDFMutation.mutate({ id: aprId! })}
+            disabled={generatePDFMutation.isPending}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            {generatePDFMutation.isPending ? "Gerando..." : "Gerar PDF"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLocation("/dashboard")}
+          >
+            <Home className="h-4 w-4 mr-2" />
+            Dashboard
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => setLocation(`/aprs/${aprId}`)}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Cancelar
+          </Button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

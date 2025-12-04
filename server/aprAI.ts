@@ -131,9 +131,10 @@ ${activityDescription}
 RESPOSTAS DO QUESTIONÁRIO:
 ${responsesContext}
 
-${images.length > 0 ? `IMAGENS ANEXADAS: ${images.length} imagens do local de trabalho estão anexadas abaixo. Analise-as cuidadosamente para identificar riscos visíveis, condições inseguras, EPIs presentes/ausentes, equipamentos, e qualquer violação das NRs.` : 'Nenhuma imagem foi fornecida.'}
+INFORMAÇÕES SOBRE IMAGENS:
+${imageContext}
 
-Gere uma análise estruturada identificando todas as tarefas, perigos, riscos (P, S, NR), medidas de controle e NRs aplicáveis. Considere tanto as informações textuais quanto os riscos visíveis nas imagens.`
+Gere uma análise estruturada identificando todas as tarefas, perigos, riscos (P, S, NR), medidas de controle e NRs aplicáveis.`
     : `Analyze the following work activity and generate a complete PRA according to Brazilian standards:
 
 ACTIVITY DESCRIPTION:
@@ -142,33 +143,16 @@ ${activityDescription}
 QUESTIONNAIRE RESPONSES:
 ${responsesContext}
 
-${images.length > 0 ? `ATTACHED IMAGES: ${images.length} workplace images are attached below. Analyze them carefully to identify visible risks, unsafe conditions, present/absent PPE, equipment, and any NR violations.` : 'No images were provided.'}
+IMAGE INFORMATION:
+${imageContext}
 
-Generate a structured analysis identifying all tasks, hazards, risks (P, S, NR), control measures, and applicable NRs. Consider both textual information and visible risks in the images.`;
+Generate a structured analysis identifying all tasks, hazards, risks (P, S, NR), control measures, and applicable NRs.`;
 
   try {
-    // Build message content with images
-    const userContent: any[] = [
-      { type: "text", text: userPrompt },
-    ];
-
-    // Add images to the message
-    if (images.length > 0) {
-      for (const img of images) {
-        userContent.push({
-          type: "image_url",
-          image_url: {
-            url: img.imageUrl,
-            detail: "high",
-          },
-        });
-      }
-    }
-
     const response = await invokeLLM({
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: userContent },
+        { role: "user", content: userPrompt },
       ],
       response_format: {
         type: "json_schema",
@@ -185,8 +169,8 @@ Generate a structured analysis identifying all tasks, hazards, risks (P, S, NR),
                   properties: {
                     task: { type: "string", description: isPortuguese ? "Tarefa/etapa da atividade" : "Task/step of activity" },
                     hazard: { type: "string", description: isPortuguese ? "Perigo existente" : "Existing hazard" },
-                    probability: { type: "integer", minimum: 1, maximum: 4, description: "P" },
-                    severity: { type: "integer", minimum: 1, maximum: 4, description: "S" },
+                    probability: { type: "integer", enum: [1, 2, 3, 4], description: "P" },
+                    severity: { type: "integer", enum: [1, 2, 3, 4], description: "S" },
                     controlMeasures: { type: "string", description: isPortuguese ? "Medidas de controle específicas" : "Specific control measures" },
                     applicableNRs: {
                       type: "array",
@@ -245,14 +229,8 @@ Generate a structured analysis identifying all tasks, hazards, risks (P, S, NR),
       },
     });
 
-    if (!response || !response.choices || response.choices.length === 0) {
-      console.error("[APR AI] Invalid response structure:", response);
-      throw new Error("Invalid response from AI: no choices returned");
-    }
-
     const content = response.choices[0]?.message?.content;
     if (!content || typeof content !== 'string') {
-      console.error("[APR AI] No content in response:", response.choices[0]);
       throw new Error("No response from AI");
     }
 

@@ -54,36 +54,18 @@ export const aprs = mysqlTable("aprs", {
   status: mysqlEnum("status", ["draft", "pending_approval", "approved", "rejected"]).default("draft").notNull(),
   aiAnalysis: json("ai_analysis").$type<{
     risks: Array<{
-      task: string;
-      hazard: string;
-      probability: 1 | 2 | 3 | 4;
-      severity: 1 | 2 | 3 | 4;
-      riskLevel: number;
-      riskCategory: string;
-      controlMeasures: string;
-      applicableNRs: string[];
+      type: string;
+      description: string;
+      consequences: string;
+      probability: string;
+      severity: string;
     }>;
-    specialWorkPermits: {
-      nr10_electrical: boolean;
-      nr35_height: boolean;
-      nr33_confined: boolean;
-      nr12_pressure: boolean;
-      nr18_excavation: boolean;
-      nr18_hot_work: boolean;
-      nr18_lifting: boolean;
-      others: string;
+    controlMeasures: {
+      existing: string[];
+      recommended: string[];
     };
     requiredPPE: string[];
-    communicationNeeds: {
-      management: boolean;
-      supervision: boolean;
-      safety: boolean;
-      environment: boolean;
-      emergency_brigade: boolean;
-      security: boolean;
-      purchasing: boolean;
-      hr: boolean;
-    };
+    specialPermissions: string[];
     summary: string;
   }>(),
   approvalComments: text("approval_comments"),

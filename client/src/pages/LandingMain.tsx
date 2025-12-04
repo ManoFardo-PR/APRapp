@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Shield, CheckCircle, FileText, Brain, Users, TrendingUp, ArrowRight } from "lucide-react";
@@ -8,9 +9,17 @@ import { Label } from "@/components/ui/label";
 import { getLoginUrl } from "@/const";
 
 export default function LandingMain() {
+  const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [companyCode, setCompanyCode] = useState("");
   const [showSuperAdminLogin, setShowSuperAdminLogin] = useState(false);
+
+  // Redirect company_admin to dashboard
+  useEffect(() => {
+    if (user && user.role === "company_admin") {
+      setLocation("/dashboard");
+    }
+  }, [user, setLocation]);
 
   const handleCompanyAccess = () => {
     if (companyCode.trim()) {
