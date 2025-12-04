@@ -144,34 +144,33 @@ export async function generateAprPdfReport(data: AprReportData, language: "pt-BR
 </html>
   `;
 
-  // Convert HTML to PDF using weasyprint
-  const { execSync } = await import('child_process');
-  const { writeFileSync, readFileSync, unlinkSync } = await import('fs');
-  const { join } = await import('path');
-  const tmpDir = '/tmp';
-  const timestamp = Date.now();
-  const htmlPath = join(tmpDir, `apr-${timestamp}.html`);
-  const pdfPath = join(tmpDir, `apr-${timestamp}.pdf`);
+    // Convert HTML to PDF using puppeteer
+  const puppeteer = (await import('puppeteer')).default;
   
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+
   try {
-    // Write HTML to temp file
-    writeFileSync(htmlPath, html, 'utf-8');
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
     
-    // Convert HTML to PDF using weasyprint
-    execSync(`weasyprint ${htmlPath} ${pdfPath}`, { encoding: 'utf-8' });
-    
-    // Read PDF buffer
-    const pdfBuffer = readFileSync(pdfPath);
-    
-    // Clean up temp files
-    unlinkSync(htmlPath);
-    unlinkSync(pdfPath);
-    
-    return pdfBuffer;
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: {
+        top: '20mm',
+        right: '15mm',
+        bottom: '20mm',
+        left: '15mm'
+      }
+    });
+
+    await browser.close();
+    return Buffer.from(pdfBuffer);
   } catch (error) {
-    // Clean up on error
-    try { unlinkSync(htmlPath); } catch {}
-    try { unlinkSync(pdfPath); } catch {}
+    await browser.close();
     throw error;
   }
 }

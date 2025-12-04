@@ -295,3 +295,10 @@
 - [x] Tornar cards de estatísticas do dashboard clicáveis
 - [x] Implementar navegação com filtro ao clicar nos cards (Total, Pendentes, Aprovadas, Rejeitadas)
 - [x] Testar fluxo completo de geração de PDF e navegação por filtros (30 testes passando)
+
+
+## Correção de Erro Weasyprint
+- [x] Substituir weasyprint por puppeteer para geração de PDF
+- [x] Instalar puppeteer no projeto
+- [x] Modificar aprReport.ts para usar puppeteer ao invés de weasyprint
+- [x] Testar geração de PDF (30 testes passando, servidor reiniciado com sucesso)
