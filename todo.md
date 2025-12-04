@@ -284,3 +284,14 @@
 - [x] Adicionar link "Voltar ao Dashboard" em páginas principais (AprDetail, EditApr)
 - [x] Configurar redirecionamento automático para /dashboard ao invés de / para company_admin logado
 - [ ] Testar fluxo completo de navegação e geração de PDF
+
+
+## Correções de PDF, Números de APR e Cards Clicáveis
+- [x] Investigar erro ao gerar PDF ("Falha ao carregar documento PDF")
+- [x] Corrigir geração de PDF no backend (usar weasyprint para converter HTML para PDF)
+- [x] Adicionar "APR #ID" em evidência no dashboard
+- [x] Adicionar "APR #ID" em evidência nas listagens de APRs (Dashboard)
+- [x] Adicionar "APR #ID" em evidência na página de detalhes
+- [x] Tornar cards de estatísticas do dashboard clicáveis
+- [x] Implementar navegação com filtro ao clicar nos cards (Total, Pendentes, Aprovadas, Rejeitadas)
+- [x] Testar fluxo completo de geração de PDF e navegação por filtros (30 testes passando)

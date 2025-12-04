@@ -144,9 +144,36 @@ export async function generateAprPdfReport(data: AprReportData, language: "pt-BR
 </html>
   `;
 
-  // Convert HTML to PDF using a library (placeholder for now)
-  // In production, use puppeteer, wkhtmltopdf, or similar
-  return Buffer.from(html, 'utf-8');
+  // Convert HTML to PDF using weasyprint
+  const { execSync } = await import('child_process');
+  const { writeFileSync, readFileSync, unlinkSync } = await import('fs');
+  const { join } = await import('path');
+  const tmpDir = '/tmp';
+  const timestamp = Date.now();
+  const htmlPath = join(tmpDir, `apr-${timestamp}.html`);
+  const pdfPath = join(tmpDir, `apr-${timestamp}.pdf`);
+  
+  try {
+    // Write HTML to temp file
+    writeFileSync(htmlPath, html, 'utf-8');
+    
+    // Convert HTML to PDF using weasyprint
+    execSync(`weasyprint ${htmlPath} ${pdfPath}`, { encoding: 'utf-8' });
+    
+    // Read PDF buffer
+    const pdfBuffer = readFileSync(pdfPath);
+    
+    // Clean up temp files
+    unlinkSync(htmlPath);
+    unlinkSync(pdfPath);
+    
+    return pdfBuffer;
+  } catch (error) {
+    // Clean up on error
+    try { unlinkSync(htmlPath); } catch {}
+    try { unlinkSync(pdfPath); } catch {}
+    throw error;
+  }
 }
 
 function generateRiskAnalysisSection(analysis: AprAIAnalysis, language: "pt-BR" | "en-US"): string {

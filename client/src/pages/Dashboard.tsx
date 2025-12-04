@@ -67,53 +67,61 @@ export default function Dashboard() {
       {/* Statistics Cards */}
       {stats && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {t("stats.total_aprs")}
-              </CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.total || 0}</div>
-            </CardContent>
-          </Card>
+          <Link href="/aprs">
+            <Card className="cursor-pointer hover:bg-accent transition-colors">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {t("stats.total_aprs")}
+                </CardTitle>
+                <FileText className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.total || 0}</div>
+              </CardContent>
+            </Card>
+          </Link>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {t("stats.pending")}
-              </CardTitle>
-              <Clock className="h-4 w-4 text-yellow-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.pending || 0}</div>
-            </CardContent>
-          </Card>
+          <Link href="/aprs?status=pending_approval">
+            <Card className="cursor-pointer hover:bg-accent transition-colors">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {t("stats.pending")}
+                </CardTitle>
+                <Clock className="h-4 w-4 text-yellow-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.pending || 0}</div>
+              </CardContent>
+            </Card>
+          </Link>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {t("stats.approved")}
-              </CardTitle>
-              <CheckCircle className="h-4 w-4 text-green-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.approved || 0}</div>
-            </CardContent>
-          </Card>
+          <Link href="/aprs?status=approved">
+            <Card className="cursor-pointer hover:bg-accent transition-colors">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {t("stats.approved")}
+                </CardTitle>
+                <CheckCircle className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.approved || 0}</div>
+              </CardContent>
+            </Card>
+          </Link>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {t("stats.rejected")}
-              </CardTitle>
-              <XCircle className="h-4 w-4 text-red-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.rejected || 0}</div>
-            </CardContent>
-          </Card>
+          <Link href="/aprs?status=rejected">
+            <Card className="cursor-pointer hover:bg-accent transition-colors">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {t("stats.rejected")}
+                </CardTitle>
+                <XCircle className="h-4 w-4 text-red-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.rejected || 0}</div>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
       )}
 
@@ -177,7 +185,9 @@ export default function Dashboard() {
                 <Link key={apr.id} href={`/aprs/${apr.id}`}>
                   <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent cursor-pointer">
                     <div>
-                      <p className="font-medium">{apr.title}</p>
+                      <p className="font-medium">
+                        <span className="text-primary font-bold">APR #{apr.id}</span> - {apr.title}
+                      </p>
                       <p className="text-sm text-muted-foreground">
                         {new Date(apr.createdAt).toLocaleDateString()}
                       </p>

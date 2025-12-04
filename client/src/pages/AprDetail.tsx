@@ -207,7 +207,9 @@ export default function AprDetail() {
               <FileText className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">{apr.title}</h1>
+              <h1 className="text-xl font-bold">
+                <span className="text-primary">APR #{apr.id}</span> - {apr.title}
+              </h1>
               <p className="text-sm text-muted-foreground">
                 Detalhes da Análise Preliminar de Risco
               </p>
