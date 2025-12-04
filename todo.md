@@ -302,3 +302,9 @@
 - [x] Instalar puppeteer no projeto
 - [x] Modificar aprReport.ts para usar puppeteer ao invés de weasyprint
 - [x] Testar geração de PDF (30 testes passando, servidor reiniciado com sucesso)
+
+
+## Correção de Erro na Rota /empresa/:code
+- [x] Verificar se rota /empresa/:code existe no App.tsx (existe, aponta para LandingCompany)
+- [x] Corrigir imports faltantes no LandingMain.tsx (useState, useEffect)
+- [x] Testar fluxo completo de acesso por código (servidor funcionando sem erros)
