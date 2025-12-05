@@ -308,3 +308,8 @@
 - [x] Verificar se rota /empresa/:code existe no App.tsx (existe, aponta para LandingCompany)
 - [x] Corrigir imports faltantes no LandingMain.tsx (useState, useEffect)
 - [x] Testar fluxo completo de acesso por código (servidor funcionando sem erros)
+
+
+## Correção de Erro do Puppeteer (Chrome não encontrado)
+- [x] Instalar Chrome para Puppeteer (chrome@143.0.7499.40)
+- [x] Testar geração de PDF novamente
