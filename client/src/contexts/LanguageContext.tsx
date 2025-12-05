@@ -115,6 +115,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Statistics
     "stats.total_aprs": "Total de APRs",
+    "stats.drafts": "Rascunhos",
     "stats.draft": "Rascunhos",
     "stats.pending": "Pendentes",
     "stats.approved": "Aprovadas",
@@ -237,6 +238,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Statistics
     "stats.total_aprs": "Total PRAs",
+    "stats.drafts": "Drafts",
     "stats.draft": "Drafts",
     "stats.pending": "Pending",
     "stats.approved": "Approved",

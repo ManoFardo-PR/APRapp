@@ -313,3 +313,11 @@
 ## Correção de Erro do Puppeteer (Chrome não encontrado)
 - [x] Instalar Chrome para Puppeteer (chrome@143.0.7499.40)
 - [x] Testar geração de PDF novamente
+
+## Card de Rascunhos no Dashboard
+- [x] Adicionar card de "Rascunhos" no dashboard
+- [x] Atualizar grid do dashboard para 5 colunas (Total, Rascunhos, Pendentes, Aprovadas, Rejeitadas)
+- [x] Adicionar ícone FileEdit azul para o card de Rascunhos
+- [x] Adicionar tradução "stats.drafts" em pt-BR e en-US
+- [x] Card clicável que navega para /aprs?status=draft
+- [x] Corrigir imports duplicados no LandingMain.tsx

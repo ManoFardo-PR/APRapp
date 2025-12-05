@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link, useLocation } from "wouter";
-import { FileText, Clock, CheckCircle, XCircle, Plus, Settings } from "lucide-react";
+import { FileText, Clock, CheckCircle, XCircle, Plus, Settings, FileEdit } from "lucide-react";
 import { useEffect } from "react";
 
 export default function Dashboard() {
@@ -66,7 +66,7 @@ export default function Dashboard() {
 
       {/* Statistics Cards */}
       {stats && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           <Link href="/aprs">
             <Card className="cursor-pointer hover:bg-accent transition-colors">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -77,6 +77,20 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.total || 0}</div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/aprs?status=draft">
+            <Card className="cursor-pointer hover:bg-accent transition-colors">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {t("stats.drafts")}
+                </CardTitle>
+                <FileEdit className="h-4 w-4 text-blue-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.draft || 0}</div>
               </CardContent>
             </Card>
           </Link>
