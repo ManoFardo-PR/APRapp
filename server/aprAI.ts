@@ -59,9 +59,10 @@ export async function analyzeAprWithAI(
     .map(r => `${r.questionText}: ${r.answer}`)
     .join("\n");
 
-  // Build image context
-  const imageContext = images.length > 0
-    ? `${images.length} ${isPortuguese ? 'imagens foram fornecidas' : 'images were provided'} ${isPortuguese ? 'do local de trabalho' : 'of the workplace'}.`
+  // Build message content with images
+  const hasImages = images.length > 0;
+  const imageContext = hasImages
+    ? `${images.length} ${isPortuguese ? 'imagens foram fornecidas do local de trabalho para análise visual' : 'images were provided from the workplace for visual analysis'}.`
     : isPortuguese ? 'Nenhuma imagem foi fornecida.' : 'No images were provided.';
 
   const systemPrompt = isPortuguese
@@ -122,7 +123,7 @@ Also identify:
 
 Be technical, precise, and always reference applicable NRs.`;
 
-  const userPrompt = isPortuguese
+  const userPromptText = isPortuguese
     ? `Analise a seguinte atividade de trabalho e gere uma APR completa conforme padrão brasileiro:
 
 DESCRIÇÃO DA ATIVIDADE:
@@ -133,6 +134,8 @@ ${responsesContext}
 
 INFORMAÇÕES SOBRE IMAGENS:
 ${imageContext}
+
+${hasImages ? 'IMPORTANTE: Analise visualmente as imagens fornecidas para identificar:\n- Condições do ambiente de trabalho\n- EPIs sendo utilizados ou faltantes\n- Equipamentos e ferramentas presentes\n- Condições inseguras visíveis\n- Riscos não mencionados na descrição\n- Conformidade com NRs aplicáveis\n\nComplemente a descrição da atividade com detalhes observados nas imagens.' : ''}
 
 Gere uma análise estruturada identificando todas as tarefas, perigos, riscos (P, S, NR), medidas de controle e NRs aplicáveis.`
     : `Analyze the following work activity and generate a complete PRA according to Brazilian standards:
@@ -146,13 +149,32 @@ ${responsesContext}
 IMAGE INFORMATION:
 ${imageContext}
 
+${hasImages ? 'IMPORTANT: Visually analyze the provided images to identify:\n- Work environment conditions\n- PPE being used or missing\n- Equipment and tools present\n- Visible unsafe conditions\n- Risks not mentioned in description\n- Compliance with applicable NRs\n\nComplement the activity description with details observed in the images.' : ''}
+
 Generate a structured analysis identifying all tasks, hazards, risks (P, S, NR), control measures, and applicable NRs.`;
 
   try {
+    // Build messages with images if available
+    const userMessage: any = hasImages
+      ? {
+          role: "user",
+          content: [
+            { type: "text", text: userPromptText },
+            ...images.map(img => ({
+              type: "image_url",
+              image_url: {
+                url: img.imageUrl,
+                detail: "high" as const,
+              },
+            })),
+          ],
+        }
+      : { role: "user", content: userPromptText };
+
     const response = await invokeLLM({
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
+        userMessage,
       ],
       response_format: {
         type: "json_schema",

@@ -321,3 +321,12 @@
 - [x] Adicionar tradução "stats.drafts" em pt-BR e en-US
 - [x] Card clicável que navega para /aprs?status=draft
 - [x] Corrigir imports duplicados no LandingMain.tsx
+
+## Análise Automática por IA na Criação de APR
+- [x] Modificar procedure aprs.create para chamar IA automaticamente após salvar APR
+- [x] Atualizar aprAI.ts para retornar descrição complementada com ações detalhadas
+- [x] Salvar análise da IA no campo aiAnalysis automaticamente
+- [x] Remover botão "Analisar com IA" do AprDetail.tsx (análise será automática)
+- [x] Adicionar tratamento de erro para não falhar criação se IA falhar
+- [x] Enviar imagens reais para IA com detail="high" para análise visual profunda
+- [x] Atualizar prompts da IA para complementar descrição com detalhes das imagens

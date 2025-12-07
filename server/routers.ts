@@ -419,6 +419,56 @@ export const appRouter = router({
           userAgent: ctx.req.headers["user-agent"] || null,
         });
 
+        // Automatically analyze APR with AI after creation
+        try {
+          const images = await aprDb.getAprImages(aprId);
+          const responses = await aprDb.getAprResponses(aprId);
+          
+          // Get user language
+          const user = await db.getUserById(ctx.user.id);
+          const language = user?.language || "pt-BR";
+
+          // Import AI module
+          const { analyzeAprWithAI } = await import("./aprAI");
+
+          // Analyze with AI
+          const analysis = await analyzeAprWithAI(
+            input.activityDescription,
+            responses,
+            images,
+            language
+          );
+
+          // Update APR with AI analysis
+          await aprDb.updateApr(aprId, ctx.user.companyId, {
+            aiAnalysis: analysis as any,
+          });
+
+          await db.createAuditLog({
+            companyId: ctx.user.companyId,
+            userId: ctx.user.id,
+            action: "AI_ANALYZE_APR",
+            entityType: "apr",
+            entityId: aprId,
+            details: { risksFound: analysis.risks.length, automatic: true },
+            ipAddress: ctx.req.ip,
+            userAgent: ctx.req.headers["user-agent"] || null,
+          });
+        } catch (aiError) {
+          console.error('[APR Create] AI analysis failed:', aiError);
+          // Don't fail the entire creation if AI fails, just log it
+          await db.createAuditLog({
+            companyId: ctx.user.companyId,
+            userId: ctx.user.id,
+            action: "AI_ANALYZE_APR_FAILED",
+            entityType: "apr",
+            entityId: aprId,
+            details: { error: String(aiError) },
+            ipAddress: ctx.req.ip,
+            userAgent: ctx.req.headers["user-agent"] || null,
+          });
+        }
+
         return { aprId };
       }),
 
