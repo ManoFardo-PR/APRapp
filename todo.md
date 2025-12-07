@@ -330,3 +330,13 @@
 - [x] Adicionar tratamento de erro para não falhar criação se IA falhar
 - [x] Enviar imagens reais para IA com detail="high" para análise visual profunda
 - [x] Atualizar prompts da IA para complementar descrição com detalhes das imagens
+
+## Aprimoramento de Descrição por IA (ANTES de criar APR)
+- [x] Remover chamada automática de IA do procedure aprs.create
+- [x] Criar procedure enhanceDescription que recebe descrição + imagens e retorna descrição aprimorada
+- [x] Criar função enhanceDescriptionWithAI no aprAI.ts
+- [x] Adicionar botão "Aprimorar com IA" na tela de edição (EditApr.tsx)
+- [x] IA complementa descrição com detalhes observados nas imagens (detail="high")
+- [x] Usuário pode aceitar ou editar sugestão da IA antes de salvar
+- [x] APR é criada com descrição já aprimorada pelo usuário
+- [x] Análise de riscos (P×S=NR) será feita separadamente após criação

@@ -9,7 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useLocation, useRoute } from "wouter";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, Save, Download, Home } from "lucide-react";
+import { ArrowLeft, Save, Download, Home, Sparkles } from "lucide-react";
 
 export default function EditApr() {
   const { user } = useAuth();
@@ -22,6 +22,7 @@ export default function EditApr() {
   const [description, setDescription] = useState("");
   const [location, setLocationField] = useState("");
   const [activityDescription, setActivityDescription] = useState("");
+  const [isEnhancing, setIsEnhancing] = useState(false);
 
   const { data: apr, isLoading } = trpc.aprs.getById.useQuery(
     { id: aprId! },
@@ -44,6 +45,18 @@ export default function EditApr() {
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao atualizar APR");
+    },
+  });
+
+  const enhanceDescriptionMutation = trpc.aprs.enhanceDescription.useMutation({
+    onSuccess: (result) => {
+      setActivityDescription(result.enhancedDescription);
+      setIsEnhancing(false);
+      toast.success("Descrição aprimorada com IA");
+    },
+    onError: (error) => {
+      setIsEnhancing(false);
+      toast.error(error.message || "Erro ao aprimorar descrição");
     },
   });
 
@@ -256,7 +269,29 @@ export default function EditApr() {
             </div>
 
             <div>
-              <Label htmlFor="activityDescription">Descrição da Atividade *</Label>
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor="activityDescription">Descrição da Atividade *</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (!activityDescription.trim()) {
+                      toast.error("Digite uma descrição antes de aprimorar");
+                      return;
+                    }
+                    setIsEnhancing(true);
+                    enhanceDescriptionMutation.mutate({
+                      activityDescription,
+                      images: apr?.images?.map(img => ({ imageUrl: img.imageUrl })) || [],
+                    });
+                  }}
+                  disabled={isEnhancing || !activityDescription.trim()}
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  {isEnhancing ? "Aprimorando..." : "Aprimorar com IA"}
+                </Button>
+              </div>
               <Textarea
                 id="activityDescription"
                 value={activityDescription}
@@ -265,6 +300,9 @@ export default function EditApr() {
                 rows={6}
                 required
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Dica: Clique em "Aprimorar com IA" para complementar a descrição com análise das imagens
+              </p>
             </div>
           </CardContent>
         </Card>

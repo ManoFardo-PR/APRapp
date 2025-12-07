@@ -383,3 +383,123 @@ export function generateAprSummary(
   
   return summary;
 }
+
+
+/**
+ * Enhance activity description with AI analysis of text and images
+ * This is called BEFORE creating the APR to improve the description
+ */
+export async function enhanceDescriptionWithAI(
+  activityDescription: string,
+  images: { imageUrl: string }[],
+  language: "pt-BR" | "en-US" = "pt-BR"
+): Promise<string> {
+  const isPortuguese = language === "pt-BR";
+  const hasImages = images.length > 0;
+
+  const systemPrompt = isPortuguese
+    ? `Você é um especialista em Segurança do Trabalho com profundo conhecimento das Normas Regulamentadoras (NRs) brasileiras.
+
+Sua função é aprimorar descrições de atividades de trabalho, complementando com detalhes observados em imagens e informações técnicas relevantes.
+
+Você deve:
+1. Analisar a descrição fornecida pelo usuário
+2. Analisar visualmente as imagens (se fornecidas)
+3. Complementar a descrição com:
+   - Detalhes do ambiente de trabalho observados nas imagens
+   - Equipamentos e ferramentas identificados
+   - Condições de trabalho visíveis
+   - Etapas da atividade que podem ser inferidas
+   - Aspectos de segurança relevantes
+
+IMPORTANTE:
+- Mantenha o texto original do usuário
+- ADICIONE informações complementares de forma natural
+- Seja técnico mas claro
+- NÃO remova informações fornecidas pelo usuário
+- NÃO faça análise de riscos (isso será feito depois)
+- Foque em DESCREVER a atividade de forma mais completa`
+    : `You are an Occupational Safety expert with deep knowledge of Brazilian Regulatory Standards (NRs).
+
+Your role is to enhance work activity descriptions by complementing them with details observed in images and relevant technical information.
+
+You must:
+1. Analyze the description provided by the user
+2. Visually analyze the images (if provided)
+3. Complement the description with:
+   - Work environment details observed in images
+   - Equipment and tools identified
+   - Visible working conditions
+   - Activity steps that can be inferred
+   - Relevant safety aspects
+
+IMPORTANT:
+- Keep the user's original text
+- ADD complementary information naturally
+- Be technical but clear
+- DO NOT remove information provided by the user
+- DO NOT perform risk analysis (that will be done later)
+- Focus on DESCRIBING the activity more completely`;
+
+  const userPromptText = isPortuguese
+    ? `Aprimorar a seguinte descrição de atividade de trabalho:
+
+DESCRIÇÃO ORIGINAL:
+${activityDescription}
+
+${hasImages ? `IMPORTANTE: Analise as ${images.length} imagens fornecidas e complemente a descrição com detalhes observados:
+- Ambiente de trabalho e condições
+- Equipamentos, ferramentas e materiais visíveis
+- Etapas da atividade que podem ser identificadas
+- Altura, espaços, acessos
+- Qualquer detalhe relevante para entender melhor a atividade
+
+Retorne a descrição aprimorada em texto corrido, incorporando naturalmente as informações das imagens.` : 'Retorne a descrição aprimorada com mais detalhes técnicos.'}`
+    : `Enhance the following work activity description:
+
+ORIGINAL DESCRIPTION:
+${activityDescription}
+
+${hasImages ? `IMPORTANT: Analyze the ${images.length} provided images and complement the description with observed details:
+- Work environment and conditions
+- Visible equipment, tools and materials
+- Activity steps that can be identified
+- Height, spaces, accesses
+- Any relevant detail to better understand the activity
+
+Return the enhanced description in flowing text, naturally incorporating information from the images.` : 'Return the enhanced description with more technical details.'}`;
+
+  try {
+    // Build messages with images if available
+    const userMessage: any = hasImages
+      ? {
+          role: "user",
+          content: [
+            { type: "text", text: userPromptText },
+            ...images.map(img => ({
+              type: "image_url",
+              image_url: {
+                url: img.imageUrl,
+                detail: "high" as const,
+              },
+            })),
+          ],
+        }
+      : { role: "user", content: userPromptText };
+
+    const response = await invokeLLM({
+      messages: [
+        { role: "system", content: systemPrompt },
+        userMessage,
+      ],
+    });
+
+    const content = response.choices?.[0]?.message?.content;
+    const enhancedDescription = typeof content === 'string' ? content : activityDescription;
+    return enhancedDescription.trim();
+  } catch (error) {
+    console.error('[APR AI] Error enhancing description:', error);
+    // If AI fails, return original description
+    return activityDescription;
+  }
+}
