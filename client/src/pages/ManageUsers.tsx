@@ -29,7 +29,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { UserPlus, Edit, Loader2, Search, AlertCircle } from "lucide-react";
+import { UserPlus, Edit, Loader2, Search, AlertCircle, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 
@@ -141,6 +141,17 @@ export default function ManageUsers() {
     <div className="container py-8 max-w-7xl">
       {/* Header */}
       <div className="mb-8">
+        <div className="flex items-center gap-4 mb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.location.href = '/dashboard'}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar ao Dashboard
+          </Button>
+        </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestão de Usuários</h1>
         <p className="text-gray-600">Gerencie os usuários da sua empresa</p>
       </div>

@@ -464,3 +464,10 @@
 - [x] Implementar redirecionamento para página inicial após logout
 - [x] Adicionar ícone LogOut do lucide-react (já existia)
 - [x] Testar fluxo completo de logout
+
+
+## Navegação em Páginas Administrativas
+- [x] Adicionar botão "Voltar ao Dashboard" na página ManageUsers.tsx
+- [x] Adicionar botão "Voltar ao Dashboard" na página AprList.tsx
+- [x] Verificar navegação em páginas administrativas (GlobalUserManagement, Statistics, PendingApprovals já têm)
+- [x] Garantir que todas as páginas tenham escape route clara
