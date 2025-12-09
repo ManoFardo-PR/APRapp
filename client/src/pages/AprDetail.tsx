@@ -240,7 +240,7 @@ export default function AprDetail() {
             </Button>
             
             {/* Action buttons for creator */}
-            {apr.createdBy === user.id && apr.status === "draft" && (
+            {apr.createdBy === user.id && (apr.status === "draft" || apr.status === "rejected") && (
               <>
                 <Button
                   variant="outline"
@@ -248,7 +248,7 @@ export default function AprDetail() {
                   onClick={() => setLocation(`/aprs/${aprId}/edit`)}
                 >
                   <Edit className="h-4 w-4 mr-2" />
-                  Editar
+                  {apr.status === "rejected" ? "Editar e Reenviar" : "Editar"}
                 </Button>
                 
                 <Button
@@ -258,7 +258,7 @@ export default function AprDetail() {
                   disabled={submitForApprovalMutation.isPending}
                 >
                   <Send className="h-4 w-4 mr-2" />
-                  {submitForApprovalMutation.isPending ? "Enviando..." : "Enviar para Aprova\u00e7\u00e3o"}
+                  {submitForApprovalMutation.isPending ? "Enviando..." : (apr.status === "rejected" ? "Reenviar para Aprovação" : "Enviar para Aprovação")}
                 </Button>
                 
                 <AlertDialog>
@@ -297,6 +297,29 @@ export default function AprDetail() {
 
       {/* Main Content */}
       <main className="container py-8 space-y-6">
+        {/* Rejection Alert */}
+        {apr.status === "rejected" && apr.createdBy === user.id && (
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
+            <div className="flex items-start gap-3">
+              <XCircle className="h-5 w-5 text-red-500 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-red-800 mb-1">
+                  APR Rejeitada - Revisão Necessária
+                </h3>
+                <p className="text-sm text-red-700 mb-2">
+                  Esta APR foi rejeitada e precisa ser revisada. Você pode editar as informações e reenviar para aprovação.
+                </p>
+                {apr.approvalComments && (
+                  <div className="bg-white border border-red-200 rounded p-3 mt-2">
+                    <p className="text-xs font-medium text-red-900 mb-1">Motivo da Rejeição:</p>
+                    <p className="text-sm text-red-800 whitespace-pre-wrap">{apr.approvalComments}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* Basic Information */}
         <Card>
           <CardHeader>

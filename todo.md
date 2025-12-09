@@ -471,3 +471,12 @@
 - [x] Adicionar botão "Voltar ao Dashboard" na página AprList.tsx
 - [x] Verificar navegação em páginas administrativas (GlobalUserManagement, Statistics, PendingApprovals já têm)
 - [x] Garantir que todas as páginas tenham escape route clara
+
+
+## Revisão de APRs Rejeitadas
+- [x] Permitir edição de APRs rejeitadas pelo solicitante original
+- [x] Adicionar botão "Editar e Reenviar" em APRs rejeitadas na página de detalhes
+- [x] Exibir alerta visual destacado de "Rejeitada" com motivo da rejeição
+- [x] Permitir reenvio para aprovação após edição (botão "Reenviar para Aprovação")
+- [x] Histórico de rejeições mantido no audit_logs (sistema já registra)
+- [x] Fluxo completo implementado: rejeitar → editar → reenviar → aprovar
