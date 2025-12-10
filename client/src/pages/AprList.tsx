@@ -5,13 +5,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
 import { Plus, FileText, ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function AprList() {
   const { user } = useAuth();
   const { t } = useLanguage();
-  const [statusFilter, setStatusFilter] = useState<string | undefined>();
+  
+  // Read status filter from URL query params
+  const urlParams = new URLSearchParams(window.location.search);
+  const statusFromUrl = urlParams.get('status');
+  
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(statusFromUrl || undefined);
+  
+  // Update filter when URL changes
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const statusFromUrl = urlParams.get('status');
+    if (statusFromUrl) {
+      setStatusFilter(statusFromUrl);
+    }
+  }, []);
 
   const { data: aprs, isLoading } = trpc.aprs.list.useQuery({ 
     status: statusFilter as any 

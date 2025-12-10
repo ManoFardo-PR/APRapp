@@ -480,3 +480,10 @@
 - [x] Permitir reenvio para aprovação após edição (botão "Reenviar para Aprovação")
 - [x] Histórico de rejeições mantido no audit_logs (sistema já registra)
 - [x] Fluxo completo implementado: rejeitar → editar → reenviar → aprovar
+
+
+## Filtros Automáticos nos Cards do Dashboard
+- [x] Modificar cards do Dashboard para navegar com query params (?status=) (já estava implementado)
+- [x] AprList agora lê filtro da URL e aplica automaticamente no useState inicial
+- [x] Cards clicáveis: Total (sem filtro), Rascunhos (draft), Pendentes (pending_approval), Aprovadas (approved), Rejeitadas (rejected)
+- [x] useEffect sincroniza filtro quando URL muda
