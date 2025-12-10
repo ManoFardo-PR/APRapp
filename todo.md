@@ -487,3 +487,10 @@
 - [x] AprList agora lê filtro da URL e aplica automaticamente no useState inicial
 - [x] Cards clicáveis: Total (sem filtro), Rascunhos (draft), Pendentes (pending_approval), Aprovadas (approved), Rejeitadas (rejected)
 - [x] useEffect sincroniza filtro quando URL muda
+
+
+## Correção: Permitir Edição de APRs Rejeitadas no EditApr.tsx
+- [x] Modificar validação no EditApr.tsx para aceitar status "rejected" além de "draft"
+- [x] Mensagem de erro atualizada: "Apenas APRs em rascunho ou rejeitadas podem ser editadas"
+- [x] Formulário agora permite edição de APRs rejeitadas
+- [x] Salvamento funciona para APRs rejeitadas

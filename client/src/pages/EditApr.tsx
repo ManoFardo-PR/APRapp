@@ -172,7 +172,7 @@ export default function EditApr() {
     );
   }
 
-  if (apr.apr.status !== "draft") {
+  if (apr.apr.status !== "draft" && apr.apr.status !== "rejected") {
     return (
       <div className="container py-8">
         <Card>
@@ -181,7 +181,7 @@ export default function EditApr() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground mb-4">
-              Apenas APRs em rascunho podem ser editadas.
+              Apenas APRs em rascunho ou rejeitadas podem ser editadas.
             </p>
             <Button onClick={() => setLocation(`/aprs/${aprId}`)}>
               Voltar para Detalhes
