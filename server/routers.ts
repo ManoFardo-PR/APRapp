@@ -545,10 +545,10 @@ export const appRouter = router({
           });
         }
 
-        if (apr.status !== "draft") {
+        if (apr.status !== "draft" && apr.status !== "rejected") {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Apenas APRs em rascunho podem ser enviadas para aprovação",
+            message: "Apenas APRs em rascunho ou rejeitadas podem ser enviadas para aprovação",
           });
         }
 

@@ -494,3 +494,10 @@
 - [x] Mensagem de erro atualizada: "Apenas APRs em rascunho ou rejeitadas podem ser editadas"
 - [x] Formulário agora permite edição de APRs rejeitadas
 - [x] Salvamento funciona para APRs rejeitadas
+
+
+## Correção Backend: Permitir Reenvio de APRs Rejeitadas
+- [x] Modificar procedure submitForApproval no backend para aceitar status "rejected" além de "draft"
+- [x] Atualizar mensagem de erro: "Apenas APRs em rascunho ou rejeitadas podem ser enviadas para aprovação"
+- [x] Reenvio de APR rejeitada agora funciona corretamente
+- [x] Status muda de "rejected" para "pending_approval" ao reenviar
