@@ -10,6 +10,7 @@ import { useLocation } from "wouter";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Upload, X } from "lucide-react";
+import AprQuestionnaire, { QuestionnaireResponse } from "@/components/AprQuestionnaire";
 
 export default function NewApr() {
   const { user } = useAuth();
@@ -21,16 +22,55 @@ export default function NewApr() {
   const [location, setLocationField] = useState("");
   const [activityDescription, setActivityDescription] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  const [showQuestionnaire, setShowQuestionnaire] = useState(false);
+  const [createdAprId, setCreatedAprId] = useState<number | null>(null);
 
   const createMutation = trpc.aprs.create.useMutation({
     onSuccess: async (data) => {
-      toast.success(t("msg.apr_created"));
-      setLocation(`/aprs/${data.aprId}`);
+      setCreatedAprId(data.aprId);
+      setShowQuestionnaire(true);
+      toast.success("APR criada! Agora responda o questionário de segurança.");
     },
     onError: (error) => {
       toast.error(error.message);
     },
   });
+
+  const saveResponsesMutation = trpc.aprs.saveResponses.useMutation({
+    onSuccess: () => {
+      toast.success("Questionário salvo com sucesso!");
+      if (createdAprId) {
+        setLocation(`/aprs/${createdAprId}`);
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const handleQuestionnaireComplete = (responses: QuestionnaireResponse[]) => {
+    if (!createdAprId) return;
+
+    const formattedResponses = responses.map((r) => ({
+      questionKey: r.questionId,
+      questionText: r.questionText,
+      answer: typeof r.answer === "boolean" 
+        ? (r.answer ? "Sim" : "Não") + (r.details ? ` - ${r.details}` : "")
+        : r.answer as string,
+      answerType: (typeof r.answer === "boolean" ? "boolean" : "text") as "boolean" | "text" | "multiple_choice",
+    }));
+
+    saveResponsesMutation.mutate({
+      aprId: createdAprId,
+      responses: formattedResponses,
+    });
+  };
+
+  const handleQuestionnaireCancel = () => {
+    if (createdAprId) {
+      setLocation(`/aprs/${createdAprId}`);
+    }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -69,6 +109,24 @@ export default function NewApr() {
     return (
       <div className="container py-8">
         <p>{t("auth.not_logged_in")}</p>
+      </div>
+    );
+  }
+
+  // Show questionnaire after APR is created
+  if (showQuestionnaire) {
+    return (
+      <div className="container py-8 max-w-4xl">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">Questionário de Segurança</h1>
+          <p className="text-muted-foreground mt-2">
+            Responda as perguntas para identificar riscos e medidas de controle
+          </p>
+        </div>
+        <AprQuestionnaire
+          onComplete={handleQuestionnaireComplete}
+          onCancel={handleQuestionnaireCancel}
+        />
       </div>
     );
   }

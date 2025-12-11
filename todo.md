@@ -18,19 +18,36 @@
 ## Módulo de Criação de APR
 - [x] Criar interface de upload de fotos (mínimo 3, máximo configurável)
 - [x] Implementar campo de descrição da atividade
-- [ ] Criar questionário interativo guiado com perguntas sobre:
-  - [ ] Identificação de atividades críticas
-  - [ ] Trabalho a quente
-  - [ ] Trabalho em altura
-  - [ ] Riscos mecânicos, elétricos, químicos, ergonômicos, biológicos
-  - [ ] LOTO (Bloqueio e travamento)
-  - [ ] Atmosferas explosivas
-  - [ ] Energia armazenada
-  - [ ] Condições ambientais
-  - [ ] EPIs necessários
-  - [ ] Medidas de controle recomendadas
-- [ ] Armazenar respostas estruturadas no banco
-- [x] Implementar validação de campos obrigatórios
+- [x] Criar questionário interativo guiado (wizard multi-etapas):
+  - [x] **Etapa 1: Atividades Críticas**
+    - [x] Trabalho em altura (>= 2m)?
+    - [x] Trabalho a quente (solda, corte, esmerilhamento)?
+    - [x] Trabalho em espaço confinado?
+    - [x] Trabalho com eletricidade (NR-10)?
+  - [x] **Etapa 2: Trabalhos Especiais**
+    - [x] LOTO necessário (bloqueio/travamento)?
+    - [x] Atmosfera explosiva presente?
+    - [x] Energia armazenada (pressão, molas, capacitores)?
+    - [x] Risco de queda de objetos?
+  - [x] **Etapa 3: Riscos Identificados**
+    - [x] Riscos mecânicos (corte, prensamento, esmagamento)
+    - [x] Riscos elétricos (choque, arco elétrico)
+    - [x] Riscos químicos (gases, vapores, poeiras)
+    - [x] Riscos ergonômicos (postura, repetição, carga)
+    - [x] Riscos biológicos (bactérias, fungos, vírus)
+    - [x] Riscos ambientais (calor, frio, ruído, vibração)
+  - [x] **Etapa 4: EPIs e Medidas de Controle**
+    - [x] EPIs obrigatórios (capacete, luvas, óculos, etc.)
+    - [x] Medidas de controle coletivas (ventilação, guarda-corpos)
+    - [x] Medidas administrativas (treinamento, permissões)
+    - [x] Equipamentos de segurança (extintores, chuveiros)
+- [x] Criar componente AprQuestionnaire.tsx com Wizard multi-etapas
+- [x] Armazenar respostas estruturadas na tabela apr_responses (procedure já existia)
+- [x] Usar procedure backend saveResponses existente
+- [x] Integrar questionário no NewApr.tsx após criação da APR
+- [x] Implementar barra de progresso e navegação entre etapas
+- [x] Campos de detalhes condicionais (aparecem quando resposta é "Sim")
+- [x] Botão "Cancelar" permite pular questionário
 
 ### Como implementar o questionário interativo:
 1. **Criar componente Questionnaire.tsx** com wizard multi-etapas
