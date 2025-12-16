@@ -104,6 +104,36 @@ export async function generateAprPdfReport(data: AprReportData, language: "pt-BR
       margin: 10px 0;
       min-height: 60px;
     }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 9pt;
+    }
+    .status-draft { background-color: #6b7280; color: white; }
+    .status-pending { background-color: #f59e0b; color: white; }
+    .status-approved { background-color: #22c55e; color: white; }
+    .status-rejected { background-color: #ef4444; color: white; }
+    .images-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .images-grid img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .image-caption {
+      font-size: 8pt;
+      color: #666;
+      text-align: center;
+      margin-top: 4px;
+    }
   </style>
 </head>
 <body>
@@ -126,6 +156,12 @@ export async function generateAprPdfReport(data: AprReportData, language: "pt-BR
       <td><strong>${isPt ? 'Empresa:' : 'Company:'}</strong></td>
       <td>${data.company.name}</td>
     </tr>
+    <tr>
+      <td><strong>${isPt ? 'Status:' : 'Status:'}</strong></td>
+      <td>${generateStatusBadge(data.apr.status, isPt)}</td>
+      <td><strong>${isPt ? 'Aprovado em:' : 'Approved on:'}</strong></td>
+      <td>${data.apr.approvedAt ? new Date(data.apr.approvedAt).toLocaleDateString(language) : '-'}</td>
+    </tr>
   </table>
 
   <h2>${isPt ? 'DESCRIÇÃO DO TRABALHO' : 'WORK DESCRIPTION'}</h2>
@@ -136,6 +172,8 @@ export async function generateAprPdfReport(data: AprReportData, language: "pt-BR
   ${generateToolsSection(data.apr.tools, language)}
   
   ${generateEmergencySection(data.apr.emergencyContacts, language)}
+
+  ${generateImagesSection(data.images, language)}
 
   ${data.analysis ? generateRiskAnalysisSection(data.analysis, language) : ''}
   
@@ -382,5 +420,35 @@ function generateEmergencySection(contacts: unknown, language: "pt-BR" | "en-US"
       `).join('')}
     </tbody>
   </table>
+  `;
+}
+
+function generateStatusBadge(status: string, isPt: boolean): string {
+  const statusMap: Record<string, { label: string; labelEn: string; cssClass: string }> = {
+    draft: { label: 'Rascunho', labelEn: 'Draft', cssClass: 'status-draft' },
+    pending_approval: { label: 'Pendente', labelEn: 'Pending', cssClass: 'status-pending' },
+    approved: { label: 'Aprovada', labelEn: 'Approved', cssClass: 'status-approved' },
+    rejected: { label: 'Rejeitada', labelEn: 'Rejected', cssClass: 'status-rejected' },
+  };
+
+  const info = statusMap[status] || { label: status, labelEn: status, cssClass: 'status-draft' };
+  return `<span class="status-badge ${info.cssClass}">${isPt ? info.label : info.labelEn}</span>`;
+}
+
+function generateImagesSection(images: { imageUrl: string; caption?: string | null }[], language: "pt-BR" | "en-US"): string {
+  const isPt = language === "pt-BR";
+
+  if (!images || images.length === 0) return '';
+
+  return `
+  <h2>${isPt ? 'IMAGENS DO LOCAL' : 'SITE IMAGES'}</h2>
+  <div class="images-grid">
+    ${images.map(img => `
+      <div>
+        <img src="${img.imageUrl}" alt="${img.caption || 'APR Image'}" />
+        ${img.caption ? `<p class="image-caption">${img.caption}</p>` : ''}
+      </div>
+    `).join('')}
+  </div>
   `;
 }

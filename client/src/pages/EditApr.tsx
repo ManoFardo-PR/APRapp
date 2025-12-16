@@ -9,7 +9,13 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useLocation, useRoute } from "wouter";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, Save, Download, Home, Sparkles } from "lucide-react";
+import { ArrowLeft, Save, Download, Home, Sparkles, Plus, Trash2, Users, Wrench, Phone } from "lucide-react";
+
+interface EmergencyContact {
+  name: string;
+  phone: string;
+  role: string;
+}
 
 export default function EditApr() {
   const { user } = useAuth();
@@ -23,6 +29,9 @@ export default function EditApr() {
   const [location, setLocationField] = useState("");
   const [activityDescription, setActivityDescription] = useState("");
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<string[]>([""]);
+  const [tools, setTools] = useState<string[]>([""]);
+  const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([{ name: "", phone: "", role: "" }]);
 
   const { data: apr, isLoading } = trpc.aprs.getById.useQuery(
     { id: aprId! },
@@ -35,6 +44,12 @@ export default function EditApr() {
       setDescription(apr.apr.description);
       setLocationField(apr.apr.location || "");
       setActivityDescription(apr.apr.activityDescription);
+      const tm = apr.apr.teamMembers as string[] | null;
+      setTeamMembers(tm && tm.length > 0 ? tm : [""]);
+      const tl = apr.apr.tools as string[] | null;
+      setTools(tl && tl.length > 0 ? tl : [""]);
+      const ec = apr.apr.emergencyContacts as EmergencyContact[] | null;
+      setEmergencyContacts(ec && ec.length > 0 ? ec : [{ name: "", phone: "", role: "" }]);
     }
   }, [apr]);
 
@@ -98,6 +113,9 @@ export default function EditApr() {
       description,
       location,
       activityDescription,
+      teamMembers: teamMembers.filter(m => m.trim() !== ""),
+      tools: tools.filter(t => t.trim() !== ""),
+      emergencyContacts: emergencyContacts.filter(c => c.name.trim() !== ""),
     });
   };
 
@@ -304,6 +322,155 @@ export default function EditApr() {
                 Dica: Clique em "Aprimorar com IA" para complementar a descrição com análise das imagens
               </p>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Team Members */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Equipe de Trabalho
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {teamMembers.map((member, index) => (
+              <div key={index} className="flex gap-2">
+                <Input
+                  value={member}
+                  onChange={(e) => {
+                    const updated = [...teamMembers];
+                    updated[index] = e.target.value;
+                    setTeamMembers(updated);
+                  }}
+                  placeholder="Nome do colaborador"
+                />
+                {teamMembers.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setTeamMembers(teamMembers.filter((_, i) => i !== index))}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setTeamMembers([...teamMembers, ""])}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar Membro
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Tools */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Wrench className="h-5 w-5" />
+              Ferramentas e Equipamentos
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {tools.map((tool, index) => (
+              <div key={index} className="flex gap-2">
+                <Input
+                  value={tool}
+                  onChange={(e) => {
+                    const updated = [...tools];
+                    updated[index] = e.target.value;
+                    setTools(updated);
+                  }}
+                  placeholder="Nome da ferramenta ou equipamento"
+                />
+                {tools.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setTools(tools.filter((_, i) => i !== index))}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setTools([...tools, ""])}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar Ferramenta
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Emergency Contacts */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Phone className="h-5 w-5" />
+              Contatos de Emergência
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {emergencyContacts.map((contact, index) => (
+              <div key={index} className="flex gap-2 items-start">
+                <div className="flex-1 grid grid-cols-3 gap-2">
+                  <Input
+                    value={contact.name}
+                    onChange={(e) => {
+                      const updated = [...emergencyContacts];
+                      updated[index] = { ...contact, name: e.target.value };
+                      setEmergencyContacts(updated);
+                    }}
+                    placeholder="Nome"
+                  />
+                  <Input
+                    value={contact.phone}
+                    onChange={(e) => {
+                      const updated = [...emergencyContacts];
+                      updated[index] = { ...contact, phone: e.target.value };
+                      setEmergencyContacts(updated);
+                    }}
+                    placeholder="Telefone"
+                  />
+                  <Input
+                    value={contact.role}
+                    onChange={(e) => {
+                      const updated = [...emergencyContacts];
+                      updated[index] = { ...contact, role: e.target.value };
+                      setEmergencyContacts(updated);
+                    }}
+                    placeholder="Cargo (opcional)"
+                  />
+                </div>
+                {emergencyContacts.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setEmergencyContacts(emergencyContacts.filter((_, i) => i !== index))}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setEmergencyContacts([...emergencyContacts, { name: "", phone: "", role: "" }])}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar Contato
+            </Button>
           </CardContent>
         </Card>
 
