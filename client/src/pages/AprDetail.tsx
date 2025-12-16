@@ -6,10 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useLocation, useRoute } from "wouter";
-import { 
-  ArrowLeft, 
-  CheckCircle, 
-  XCircle, 
+import {
+  ArrowLeft,
+  CheckCircle,
+  XCircle,
   Clock,
   FileText,
   MapPin,
@@ -20,7 +20,11 @@ import {
   Trash2,
   Send,
   Download,
-  Home
+  Home,
+  Brain,
+  AlertTriangle,
+  ShieldAlert,
+  HardHat
 } from "lucide-react";
 import {
   AlertDialog,
@@ -162,8 +166,8 @@ export default function AprDetail() {
 
   const { apr, images, responses, signatures } = data;
 
-  const canReview = 
-    apr.status === "pending_approval" && 
+  const canReview =
+    apr.status === "pending_approval" &&
     (user.role === "safety_tech" || user.role === "company_admin" || user.role === "superadmin");
 
   const handleReview = (approved: boolean) => {
@@ -217,7 +221,7 @@ export default function AprDetail() {
           </div>
           <div className="flex items-center gap-2">
             {getStatusBadge(apr.status)}
-            
+
             {/* Gerar PDF button - available for all */}
             <Button
               variant="outline"
@@ -228,7 +232,7 @@ export default function AprDetail() {
               <Download className="h-4 w-4 mr-2" />
               {generatePDFMutation.isPending ? "Gerando..." : "Gerar PDF"}
             </Button>
-            
+
             {/* Dashboard button */}
             <Button
               variant="outline"
@@ -238,7 +242,7 @@ export default function AprDetail() {
               <Home className="h-4 w-4 mr-2" />
               Dashboard
             </Button>
-            
+
             {/* Action buttons for creator */}
             {apr.createdBy === user.id && (apr.status === "draft" || apr.status === "rejected") && (
               <>
@@ -250,7 +254,7 @@ export default function AprDetail() {
                   <Edit className="h-4 w-4 mr-2" />
                   {apr.status === "rejected" ? "Editar e Reenviar" : "Editar"}
                 </Button>
-                
+
                 <Button
                   variant="default"
                   size="sm"
@@ -260,7 +264,7 @@ export default function AprDetail() {
                   <Send className="h-4 w-4 mr-2" />
                   {submitForApprovalMutation.isPending ? "Enviando..." : (apr.status === "rejected" ? "Reenviar para Aprovação" : "Enviar para Aprovação")}
                 </Button>
-                
+
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button
@@ -319,7 +323,7 @@ export default function AprDetail() {
             </div>
           </div>
         )}
-        
+
         {/* Basic Information */}
         <Card>
           <CardHeader>
