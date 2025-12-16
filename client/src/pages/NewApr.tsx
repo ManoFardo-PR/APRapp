@@ -9,7 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useLocation } from "wouter";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Upload, X, Sparkles, AlertCircle } from "lucide-react";
+import { Upload, X, Sparkles, AlertCircle, Plus, Trash2 } from "lucide-react";
 import AprQuestionnaire, { QuestionnaireResponse } from "@/components/AprQuestionnaire";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -27,6 +27,11 @@ export default function NewApr() {
   const [createdAprId, setCreatedAprId] = useState<number | null>(null);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // New fields state
+  const [teamMembers, setTeamMembers] = useState<string[]>([""]);
+  const [tools, setTools] = useState<string[]>([""]);
+  const [emergencyContacts, setEmergencyContacts] = useState<{ name: string, phone: string, role: string }[]>([{ name: "", phone: "", role: "" }]);
 
   const createMutation = trpc.aprs.create.useMutation({
     onSuccess: async (data) => {
@@ -152,6 +157,9 @@ export default function NewApr() {
       description,
       location,
       activityDescription,
+      teamMembers: teamMembers.filter(m => m.trim() !== ""),
+      tools: tools.filter(t => t.trim() !== ""),
+      emergencyContacts: emergencyContacts.filter(c => c.name.trim() !== ""),
     });
   };
 
@@ -256,9 +264,160 @@ export default function NewApr() {
           </CardContent>
         </Card>
 
-        {/* TODO: Add Team Members list */}
-        {/* TODO: Add Tool Checklist */}
-        {/* TODO: Add Emergency Contacts */}
+      </CardContent>
+    </Card>
+
+        {/* Team Members Section */ }
+  <Card>
+    <CardHeader>
+      <CardTitle>Equipe de Trabalho</CardTitle>
+    </CardHeader>
+    <CardContent className="space-y-4">
+      {teamMembers.map((member, index) => (
+        <div key={index} className="flex gap-2">
+          <Input
+            value={member}
+            onChange={(e) => {
+              const newMembers = [...teamMembers];
+              newMembers[index] = e.target.value;
+              setTeamMembers(newMembers);
+            }}
+            placeholder="Nome do colaborador"
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              const newMembers = teamMembers.filter((_, i) => i !== index);
+              setTeamMembers(newMembers.length ? newMembers : [""]);
+            }}
+            className="text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ))}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => setTeamMembers([...teamMembers, ""])}
+        className="mt-2"
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Adicionar Membro
+      </Button>
+    </CardContent>
+  </Card>
+
+  {/* Tools Section */ }
+  <Card>
+    <CardHeader>
+      <CardTitle>Ferramentas e Equipamentos</CardTitle>
+    </CardHeader>
+    <CardContent className="space-y-4">
+      {tools.map((tool, index) => (
+        <div key={index} className="flex gap-2">
+          <Input
+            value={tool}
+            onChange={(e) => {
+              const newTools = [...tools];
+              newTools[index] = e.target.value;
+              setTools(newTools);
+            }}
+            placeholder="Ex: Furadeira, Escada, Multímetro"
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              const newTools = tools.filter((_, i) => i !== index);
+              setTools(newTools.length ? newTools : [""]);
+            }}
+            className="text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ))}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => setTools([...tools, ""])}
+        className="mt-2"
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Adicionar Ferramenta
+      </Button>
+    </CardContent>
+  </Card>
+
+  {/* Emergency Contacts Section */ }
+        <Card>
+          <CardHeader>
+            <CardTitle>Contatos de Emergência</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+             {emergencyContacts.map((contact, index) => (
+              <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <Input
+                  value={contact.name}
+                  onChange={(e) => {
+                    const newContacts = [...emergencyContacts];
+                    newContacts[index].name = e.target.value;
+                    setEmergencyContacts(newContacts);
+                  }}
+                  placeholder="Nome"
+                />
+                <Input
+                  value={contact.phone}
+                  onChange={(e) => {
+                    const newContacts = [...emergencyContacts];
+                    newContacts[index].phone = e.target.value;
+                    setEmergencyContacts(newContacts);
+                  }}
+                  placeholder="Telefone"
+                />
+                <div className="flex gap-2">
+                  <Input
+                    value={contact.role}
+                    onChange={(e) => {
+                      const newContacts = [...emergencyContacts];
+                      newContacts[index].role = e.target.value;
+                      setEmergencyContacts(newContacts);
+                    }}
+                    placeholder="Cargo/Função"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      const newContacts = emergencyContacts.filter((_, i) => i !== index);
+                      setEmergencyContacts(newContacts.length ? newContacts : [{name:"", phone: "", role: ""}]);
+                    }}
+                    className="text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setEmergencyContacts([...emergencyContacts, {name: "", phone: "", role: ""}])}
+              className="mt-2"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar Contato
+            </Button>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>
@@ -366,7 +525,7 @@ export default function NewApr() {
             {createMutation.isPending ? t("common.loading") : t("common.save")}
           </Button>
         </div>
-      </form>
-    </div>
+      </form >
+    </div >
   );
 }

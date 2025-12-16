@@ -33,7 +33,7 @@ export async function generateAprExcelReport(data: AprReportData): Promise<Buffe
  */
 export async function generateAprPdfReport(data: AprReportData, language: "pt-BR" | "en-US" = "pt-BR"): Promise<Buffer> {
   const isPt = language === "pt-BR";
-  
+
   // Build HTML content
   let html = `
 <!DOCTYPE html>
@@ -131,6 +131,12 @@ export async function generateAprPdfReport(data: AprReportData, language: "pt-BR
   <h2>${isPt ? 'DESCRIÇÃO DO TRABALHO' : 'WORK DESCRIPTION'}</h2>
   <p>${data.apr.activityDescription}</p>
 
+  ${generateTeamSection(data.apr.teamMembers, language)}
+  
+  ${generateToolsSection(data.apr.tools, language)}
+  
+  ${generateEmergencySection(data.apr.emergencyContacts, language)}
+
   ${data.analysis ? generateRiskAnalysisSection(data.analysis, language) : ''}
   
   ${generateCriteriaSection(language)}
@@ -144,9 +150,9 @@ export async function generateAprPdfReport(data: AprReportData, language: "pt-BR
 </html>
   `;
 
-    // Convert HTML to PDF using puppeteer
+  // Convert HTML to PDF using puppeteer
   const puppeteer = (await import('puppeteer')).default;
-  
+
   const browser = await puppeteer.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -155,7 +161,7 @@ export async function generateAprPdfReport(data: AprReportData, language: "pt-BR
   try {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
-    
+
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
@@ -177,7 +183,7 @@ export async function generateAprPdfReport(data: AprReportData, language: "pt-BR
 
 function generateRiskAnalysisSection(analysis: AprAIAnalysis, language: "pt-BR" | "en-US"): string {
   const isPt = language === "pt-BR";
-  
+
   let html = `
   <h2>${isPt ? 'METODOLOGIA E ANÁLISE DE RISCO' : 'METHODOLOGY AND RISK ANALYSIS'}</h2>
   <table class="risk-table">
@@ -196,12 +202,12 @@ function generateRiskAnalysisSection(analysis: AprAIAnalysis, language: "pt-BR" 
   `;
 
   for (const risk of analysis.risks) {
-    const riskClass = 
+    const riskClass =
       risk.riskLevel >= 12 ? 'risk-inadmissible' :
-      risk.riskLevel >= 6 ? 'risk-unacceptable' :
-      risk.riskLevel >= 3 ? 'risk-tolerable' :
-      'risk-acceptable';
-    
+        risk.riskLevel >= 6 ? 'risk-unacceptable' :
+          risk.riskLevel >= 3 ? 'risk-tolerable' :
+            'risk-acceptable';
+
     html += `
       <tr>
         <td>${risk.task}</td>
@@ -225,7 +231,7 @@ function generateRiskAnalysisSection(analysis: AprAIAnalysis, language: "pt-BR" 
 
 function generateCriteriaSection(language: "pt-BR" | "en-US"): string {
   const isPt = language === "pt-BR";
-  
+
   return `
   <h2>${isPt ? 'CRITÉRIOS DE AVALIAÇÃO DE RISCOS' : 'RISK ASSESSMENT CRITERIA'}</h2>
   <div class="criteria-box">
@@ -260,7 +266,7 @@ function generateCriteriaSection(language: "pt-BR" | "en-US"): string {
 function generateSpecialWorkSection(analysis: AprAIAnalysis, language: "pt-BR" | "en-US"): string {
   const isPt = language === "pt-BR";
   const permits = analysis.specialWorkPermits;
-  
+
   return `
   <h2>${isPt ? 'TRABALHOS ESPECIAIS DE RISCO' : 'SPECIAL RISK WORK'}</h2>
   <table>
@@ -286,7 +292,7 @@ function generateSpecialWorkSection(analysis: AprAIAnalysis, language: "pt-BR" |
 
 function generatePPESection(analysis: AprAIAnalysis, language: "pt-BR" | "en-US"): string {
   const isPt = language === "pt-BR";
-  
+
   return `
   <h2>${isPt ? 'EQUIPAMENTOS DE PROTEÇÃO INDIVIDUAL (EPIs) - NR-6' : 'PERSONAL PROTECTIVE EQUIPMENT (PPE) - NR-6'}</h2>
   <ul>
@@ -297,7 +303,7 @@ function generatePPESection(analysis: AprAIAnalysis, language: "pt-BR" | "en-US"
 
 function generateSignatureSection(data: AprReportData, language: "pt-BR" | "en-US"): string {
   const isPt = language === "pt-BR";
-  
+
   return `
   <h2>${isPt ? 'ASSINATURAS' : 'SIGNATURES'}</h2>
   <table>
@@ -319,5 +325,62 @@ function generateSignatureSection(data: AprReportData, language: "pt-BR" | "en-U
   <p style="text-align: center; margin-top: 20px;">
     <small>${isPt ? 'Documento gerado em' : 'Document generated on'} ${new Date().toLocaleString(language)}</small>
   </p>
+  `;
+}
+
+function generateTeamSection(teamMembers: unknown, language: "pt-BR" | "en-US"): string {
+  const isPt = language === "pt-BR";
+  const members = Array.isArray(teamMembers) ? teamMembers as string[] : [];
+
+  if (members.length === 0) return '';
+
+  return `
+  <h2>${isPt ? 'EQUIPE DE TRABALHO' : 'WORK TEAM'}</h2>
+  <ul>
+    ${members.map(member => `<li>${member}</li>`).join('')}
+  </ul>
+  `;
+}
+
+function generateToolsSection(tools: unknown, language: "pt-BR" | "en-US"): string {
+  const isPt = language === "pt-BR";
+  const items = Array.isArray(tools) ? tools as string[] : [];
+
+  if (items.length === 0) return '';
+
+  return `
+  <h2>${isPt ? 'FERRAMENTAS E EQUIPAMENTOS' : 'TOOLS AND EQUIPMENT'}</h2>
+  <ul>
+    ${items.map(item => `<li>${item}</li>`).join('')}
+  </ul>
+  `;
+}
+
+function generateEmergencySection(contacts: unknown, language: "pt-BR" | "en-US"): string {
+  const isPt = language === "pt-BR";
+  const items = Array.isArray(contacts) ? contacts as { name: string, phone: string, role?: string }[] : [];
+
+  if (items.length === 0) return '';
+
+  return `
+  <h2>${isPt ? 'CONTATOS DE EMERGÊNCIA' : 'EMERGENCY CONTACTS'}</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>${isPt ? 'Nome' : 'Name'}</th>
+        <th>${isPt ? 'Telefone' : 'Phone'}</th>
+        <th>${isPt ? 'Cargo' : 'Role'}</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${items.map(contact => `
+        <tr>
+          <td>${contact.name}</td>
+          <td>${contact.phone}</td>
+          <td>${contact.role || '-'}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
   `;
 }

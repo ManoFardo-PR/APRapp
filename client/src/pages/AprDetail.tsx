@@ -24,7 +24,10 @@ import {
   Brain,
   AlertTriangle,
   ShieldAlert,
-  HardHat
+  HardHat,
+  Users,
+  Wrench,
+  Phone
 } from "lucide-react";
 import {
   AlertDialog,
@@ -366,6 +369,52 @@ export default function AprDetail() {
                     <p className="text-sm font-medium">Aprovado por</p>
                     <p className="text-sm text-muted-foreground">ID: {apr.approvedBy}</p>
                   </div>
+                </div>
+              )}
+            </div>
+
+            {/* Team, Tools, Emergency Contacts Display */}
+            <div className="grid md:grid-cols-3 gap-6 mt-6 border-t pt-6">
+              {(apr.teamMembers as string[])?.length > 0 && (
+                <div>
+                  <h3 className="font-semibold flex items-center gap-2 mb-2 text-gray-700">
+                    <Users className="h-4 w-4" /> Equipe
+                  </h3>
+                  <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                    {(apr.teamMembers as string[]).map((member, i) => (
+                      <li key={i}>{member}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {(apr.tools as string[])?.length > 0 && (
+                <div>
+                  <h3 className="font-semibold flex items-center gap-2 mb-2 text-gray-700">
+                    <Wrench className="h-4 w-4" /> Ferramentas
+                  </h3>
+                  <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                    {(apr.tools as string[]).map((tool, i) => (
+                      <li key={i}>{tool}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {(apr.emergencyContacts as any[])?.length > 0 && (
+                <div>
+                  <h3 className="font-semibold flex items-center gap-2 mb-2 text-gray-700">
+                    <Phone className="h-4 w-4" /> Emergência
+                  </h3>
+                  <ul className="space-y-2 text-sm text-gray-600">
+                    {(apr.emergencyContacts as any[]).map((contact, i) => (
+                      <li key={i} className="bg-gray-50 p-2 rounded border">
+                        <div className="font-medium">{contact.name}</div>
+                        <div>{contact.phone}</div>
+                        {contact.role && <div className="text-xs text-gray-500">{contact.role}</div>}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>

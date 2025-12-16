@@ -71,6 +71,13 @@ export const aprs = mysqlTable("aprs", {
   approvalComments: text("approval_comments"),
   pdfUrl: varchar("pdf_url", { length: 512 }),
   qrCode: varchar("qr_code", { length: 512 }),
+  teamMembers: json("team_members").$type<string[]>(),
+  tools: json("tools").$type<string[]>(),
+  emergencyContacts: json("emergency_contacts").$type<Array<{
+    name: string;
+    phone: string;
+    role?: string;
+  }>>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
   approvedAt: timestamp("approved_at"),

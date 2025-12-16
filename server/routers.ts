@@ -15,7 +15,7 @@ import { nanoid } from "nanoid";
 
 export const appRouter = router({
   system: systemRouter,
-  
+
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
@@ -79,7 +79,7 @@ export const appRouter = router({
       }))
       .mutation(async ({ input, ctx }) => {
         const { id, ...updates } = input;
-        
+
         await db.updateCompany(id, updates);
 
         await db.createAuditLog({
@@ -197,9 +197,9 @@ export const appRouter = router({
 
         const activeCount = await countActiveUsersByCompany(ctx.user.companyId);
         if (activeCount >= company.maxUsers) {
-          throw new TRPCError({ 
-            code: "BAD_REQUEST", 
-            message: `Limite de usuários atingido (${activeCount}/${company.maxUsers})` 
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Limite de usuários atingido (${activeCount}/${company.maxUsers})`
           });
         }
 
@@ -293,7 +293,7 @@ export const appRouter = router({
         }
 
         return { success: true };
-    }),
+      }),
 
     // Get company by codes profile
     getProfile: protectedProcedure.query(async ({ ctx }) => {
@@ -376,6 +376,13 @@ export const appRouter = router({
         description: z.string().min(1),
         location: z.string().optional(),
         activityDescription: z.string().min(1),
+        teamMembers: z.array(z.string()).optional(),
+        tools: z.array(z.string()).optional(),
+        emergencyContacts: z.array(z.object({
+          name: z.string(),
+          phone: z.string(),
+          role: z.string().optional(),
+        })).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         if (!ctx.user.companyId) {
@@ -392,6 +399,9 @@ export const appRouter = router({
           description: input.description,
           location: input.location,
           activityDescription: input.activityDescription,
+          teamMembers: input.teamMembers || [],
+          tools: input.tools || [],
+          emergencyContacts: input.emergencyContacts || [],
           status: "draft",
         });
 
@@ -399,7 +409,7 @@ export const appRouter = router({
         // Extract insertId from the first element of the array
         const insertId = Array.isArray(result) && result[0] ? result[0].insertId : undefined;
         const aprId = Number(insertId);
-        
+
         if (!aprId || isNaN(aprId)) {
           console.error('[APR Create] Invalid insertId:', insertId, 'result:', result);
           throw new TRPCError({
@@ -482,6 +492,13 @@ export const appRouter = router({
         description: z.string().optional(),
         location: z.string().optional(),
         activityDescription: z.string().optional(),
+        teamMembers: z.array(z.string()).optional(),
+        tools: z.array(z.string()).optional(),
+        emergencyContacts: z.array(z.object({
+          name: z.string(),
+          phone: z.string(),
+          role: z.string().optional(),
+        })).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         if (!ctx.user.companyId) {
@@ -888,7 +905,7 @@ export const appRouter = router({
         const images = await aprDb.getAprImages(input.id);
         const company = await db.getCompanyById(ctx.user.companyId);
         const creator = await db.getUserById(apr.createdBy);
-        
+
         let approver = null;
         if (apr.approvedBy) {
           approver = await db.getUserById(apr.approvedBy);
