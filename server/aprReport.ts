@@ -1,9 +1,10 @@
-import type { Apr, AprImage } from "../drizzle/schema";
+import type { Apr, AprImage, AprResponse } from "../drizzle/schema";
 import type { AprAIAnalysis } from "./aprAI";
 
 export interface AprReportData {
   apr: Apr;
   images: AprImage[];
+  responses: AprResponse[];
   analysis: AprAIAnalysis | null;
   company: {
     name: string;
@@ -174,6 +175,8 @@ export async function generateAprPdfReport(data: AprReportData, language: "pt-BR
   ${generateEmergencySection(data.apr.emergencyContacts, language)}
 
   ${generateImagesSection(data.images, language)}
+
+  ${generateQuestionnaireSection(data.responses, language)}
 
   ${data.analysis ? generateRiskAnalysisSection(data.analysis, language) : ''}
   
@@ -429,6 +432,7 @@ function generateStatusBadge(status: string, isPt: boolean): string {
     pending_approval: { label: 'Pendente', labelEn: 'Pending', cssClass: 'status-pending' },
     approved: { label: 'Aprovada', labelEn: 'Approved', cssClass: 'status-approved' },
     rejected: { label: 'Rejeitada', labelEn: 'Rejected', cssClass: 'status-rejected' },
+    canceled: { label: 'Cancelada', labelEn: 'Canceled', cssClass: 'status-rejected' },
   };
 
   const info = statusMap[status] || { label: status, labelEn: status, cssClass: 'status-draft' };
@@ -450,5 +454,41 @@ function generateImagesSection(images: { imageUrl: string; caption?: string | nu
       </div>
     `).join('')}
   </div>
+  `;
+}
+
+function generateQuestionnaireSection(responses: { questionText: string; answer: string; answerType: string }[], language: "pt-BR" | "en-US"): string {
+  const isPt = language === "pt-BR";
+
+  if (!responses || responses.length === 0) return '';
+
+  const formatAnswer = (answer: string, answerType: string) => {
+    if (answerType === 'boolean') {
+      if (answer === 'true' || answer === 'sim' || answer === 'yes') {
+        return isPt ? '✓ Sim' : '✓ Yes';
+      }
+      return isPt ? '✗ Não' : '✗ No';
+    }
+    return answer;
+  };
+
+  return `
+  <h2>${isPt ? 'QUESTIONÁRIO DE SEGURANÇA' : 'SAFETY QUESTIONNAIRE'}</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 70%">${isPt ? 'Pergunta' : 'Question'}</th>
+        <th style="width: 30%">${isPt ? 'Resposta' : 'Answer'}</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${responses.map(r => `
+        <tr>
+          <td>${r.questionText}</td>
+          <td>${formatAnswer(r.answer, r.answerType)}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
   `;
 }

@@ -455,13 +455,27 @@ export const appRouter = router({
         const responses = await aprDb.getAprResponses(input.id);
         const signatures = await aprDb.getAprSignatures(input.id);
 
-        return { apr, images, responses, signatures };
+        // Fetch user names
+        const creator = await db.getUserById(apr.createdBy);
+        let approver = null;
+        if (apr.approvedBy) {
+          approver = await db.getUserById(apr.approvedBy);
+        }
+
+        return {
+          apr,
+          images,
+          responses,
+          signatures,
+          creatorName: creator?.name || `Usuário ${apr.createdBy}`,
+          approverName: approver?.name || null,
+        };
       }),
 
     // List APRs
     list: protectedProcedure
       .input(z.object({
-        status: z.enum(["draft", "pending_approval", "approved", "rejected"]).optional(),
+        status: z.enum(["draft", "pending_approval", "approved", "rejected", "canceled"]).optional(),
         userId: z.number().int().positive().optional(),
       }))
       .query(async ({ input, ctx }) => {
@@ -905,6 +919,7 @@ export const appRouter = router({
         const images = await aprDb.getAprImages(input.id);
         const company = await db.getCompanyById(ctx.user.companyId);
         const creator = await db.getUserById(apr.createdBy);
+        const responses = await aprDb.getAprResponses(input.id);
 
         let approver = null;
         if (apr.approvedBy) {
@@ -923,6 +938,7 @@ export const appRouter = router({
           {
             apr,
             images,
+            responses,
             analysis: apr.aiAnalysis as any,
             company: {
               name: company?.name || "",

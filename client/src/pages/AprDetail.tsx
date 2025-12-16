@@ -58,6 +58,13 @@ export default function AprDetail() {
     { enabled: !!aprId && !!user }
   );
 
+  const apr = data?.apr;
+  const images = data?.images;
+  const responses = data?.responses;
+  const creatorName = data?.creatorName;
+  const approverName = data?.approverName;
+  const signatures = data?.signatures; // Keep signatures from original data destructuring
+
   const reviewMutation = trpc.aprs.reviewApr.useMutation({
     onSuccess: () => {
       toast.success("APR revisada com sucesso");
@@ -149,7 +156,7 @@ export default function AprDetail() {
     );
   }
 
-  if (!data || !data.apr) {
+  if (!data || !apr) { // Changed from !data.apr to !apr
     return (
       <div className="container py-8">
         <Card>
@@ -167,10 +174,11 @@ export default function AprDetail() {
     );
   }
 
-  const { apr, images, responses, signatures } = data;
+  // const { apr, images, responses, signatures } = data; // Removed as apr, images, responses, creatorName, approverName are now extracted above
 
   const canReview =
     apr.status === "pending_approval" &&
+    apr.status !== "canceled" && // Added condition
     (user.role === "safety_tech" || user.role === "company_admin" || user.role === "superadmin");
 
   const handleReview = (approved: boolean) => {
@@ -191,10 +199,16 @@ export default function AprDetail() {
         return <Badge className="bg-green-500">Aprovada</Badge>;
       case "rejected":
         return <Badge variant="destructive">Rejeitada</Badge>;
+      case "canceled":
+        return <Badge variant="destructive" className="bg-gray-500">Cancelada</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
   };
+
+  const canEditOrSubmit = apr.createdBy === user.id && (apr.status === "draft" || apr.status === "rejected") && apr.status !== "canceled";
+  const canDelete = apr.createdBy === user.id && apr.status !== "canceled";
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -247,7 +261,7 @@ export default function AprDetail() {
             </Button>
 
             {/* Action buttons for creator */}
-            {apr.createdBy === user.id && (apr.status === "draft" || apr.status === "rejected") && (
+            {canEditOrSubmit && (
               <>
                 <Button
                   variant="outline"
@@ -267,36 +281,38 @@ export default function AprDetail() {
                   <Send className="h-4 w-4 mr-2" />
                   {submitForApprovalMutation.isPending ? "Enviando..." : (apr.status === "rejected" ? "Reenviar para Aprovação" : "Enviar para Aprovação")}
                 </Button>
-
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Excluir
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Confirmar Exclus\u00e3o</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Tem certeza que deseja excluir esta APR? Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => deleteMutation.mutate({ id: aprId })}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        Excluir
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
               </>
+            )}
+
+            {canDelete && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Excluir
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirmar Exclus\u00e3o</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Tem certeza que deseja excluir esta APR? Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => deleteMutation.mutate({ id: aprId })}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Excluir
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
         </div>
@@ -333,42 +349,29 @@ export default function AprDetail() {
             <CardTitle>Informações Básicas</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="flex items-start gap-3">
-                <User className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium">Criado por</p>
-                  <p className="text-sm text-muted-foreground">ID: {apr.createdBy}</p>
-                </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium">Local</p>
+                <p className="text-sm text-muted-foreground">{apr.location || "-"}</p>
               </div>
-
-              <div className="flex items-start gap-3">
-                <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <div>
+                <p className="text-sm font-medium">Data</p>
+                <p className="text-sm text-muted-foreground">
+                  {new Date(apr.createdAt).toLocaleDateString('pt-BR')}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Responsável</p>
+                <p className="text-sm text-muted-foreground">
+                  {creatorName || `Usuário ${apr.createdBy}`}
+                </p>
+              </div>
+              {approverName && (
                 <div>
-                  <p className="text-sm font-medium">Data de Criação</p>
+                  <p className="text-sm font-medium">Aprovado por</p>
                   <p className="text-sm text-muted-foreground">
-                    {new Date(apr.createdAt).toLocaleDateString('pt-BR')}
+                    {approverName} em {apr.approvedAt ? new Date(apr.approvedAt).toLocaleDateString('pt-BR') : ""}
                   </p>
-                </div>
-              </div>
-
-              {apr.location && (
-                <div className="flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium">Localização</p>
-                    <p className="text-sm text-muted-foreground">{apr.location}</p>
-                  </div>
-                </div>
-              )}
-
-              {apr.approvedBy && (
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium">Aprovado por</p>
-                    <p className="text-sm text-muted-foreground">ID: {apr.approvedBy}</p>
-                  </div>
                 </div>
               )}
             </div>
@@ -539,6 +542,6 @@ export default function AprDetail() {
           </Card>
         )}
       </main>
-    </div>
+    </div >
   );
 }

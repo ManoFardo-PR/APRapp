@@ -40,7 +40,7 @@ export type InsertUser = typeof users.$inferInsert;
 
 /**
  * APR (Análise Preliminar de Risco) main table
- * Status: draft, pending_approval, approved, rejected
+ * Status: draft, pending_approval, approved, rejected, canceled
  */
 export const aprs = mysqlTable("aprs", {
   id: int("id").autoincrement().primaryKey(),
@@ -51,7 +51,7 @@ export const aprs = mysqlTable("aprs", {
   description: text("description").notNull(),
   location: varchar("location", { length: 255 }),
   activityDescription: text("activity_description").notNull(),
-  status: mysqlEnum("status", ["draft", "pending_approval", "approved", "rejected"]).default("draft").notNull(),
+  status: mysqlEnum("status", ["draft", "pending_approval", "approved", "rejected", "canceled"]).default("draft").notNull(),
   aiAnalysis: json("ai_analysis").$type<{
     risks: Array<{
       type: string;
