@@ -518,3 +518,264 @@
 - [x] Atualizar mensagem de erro: "Apenas APRs em rascunho ou rejeitadas podem ser enviadas para aprovação"
 - [x] Reenvio de APR rejeitada agora funciona corretamente
 - [x] Status muda de "rejected" para "pending_approval" ao reenviar
+
+
+---
+---
+
+# 🚀 SUGESTÕES DE MELHORIAS E ROADMAP
+
+---
+
+## 🔴 CRÍTICO - Correções Urgentes
+
+### 1. Corrigir Erros TypeScript no EditApr.tsx
+**Prioridade:** ALTA | **Impacto:** Compilação | **Esforço:** 15min
+- [ ] Remover ou comentar linhas 51-57 do EditApr.tsx que tentam usar procedure `enhanceDescription` não encontrado
+- [ ] OU implementar procedure enhanceDescription no backend
+- **Arquivos:** `client/src/pages/EditApr.tsx`
+
+### 2. Exibir Respostas do Questionário na Página de Detalhes
+**Prioridade:** ALTA | **Impacto:** UX | **Esforço:** 2h
+- [ ] Criar procedure `getResponses` no backend (função já existe em aprDb.ts)
+- [ ] Adicionar query no AprDetail.tsx: `trpc.aprs.getResponses.useQuery({ aprId })`
+- [ ] Criar seção "Questionário de Segurança" no AprDetail.tsx
+- [ ] Agrupar respostas por etapa (Atividades Críticas, Trabalhos Especiais, Riscos, EPIs)
+- [ ] Exibir perguntas com respostas formatadas (Sim/Não + detalhes)
+- **Arquivos:** `server/routers.ts`, `client/src/pages/AprDetail.tsx`
+
+### 3. Corrigir Erro de Análise de IA
+**Prioridade:** MÉDIA | **Impacto:** Funcionalidade | **Esforço:** 1h
+- [ ] Adicionar validação em aprAI.ts para verificar se array de imagens existe antes de acessar
+- [ ] Tratar caso de análise apenas com texto (sem imagens)
+- **Problema:** `TypeError: Cannot read properties of undefined (reading '0')`
+- **Arquivos:** `server/aprAI.ts`
+
+---
+
+## 🟡 IMPORTANTE - Funcionalidades Pendentes
+
+### 4. Notificações Automáticas por Email
+**Prioridade:** ALTA | **Impacto:** Comunicação | **Esforço:** 3h
+- [ ] Notificar técnico de segurança quando APR é enviada para aprovação
+- [ ] Notificar solicitante quando APR é aprovada
+- [ ] Notificar solicitante quando APR é rejeitada (com motivo)
+- [ ] Usar sistema Manus `notifyOwner` para enviar emails
+- [ ] Template de email com link direto para APR
+- **Arquivos:** `server/routers.ts` (procedures submitForApproval e reviewApr)
+
+### 5. Botão "Aprimorar com IA" no NewApr.tsx
+**Prioridade:** MÉDIA | **Impacto:** UX | **Esforço:** 1h
+- [ ] Copiar lógica do EditApr.tsx para NewApr.tsx
+- [ ] Adicionar botão ao lado do campo "Descrição da Atividade"
+- [ ] Mutation chama `enhanceDescription` e atualiza campo
+- [ ] Usuário pode editar sugestão antes de salvar
+- **Arquivos:** `client/src/pages/NewApr.tsx`
+
+### 6. Análise de Riscos com IA (Matriz P×S=NR)
+**Prioridade:** ALTA | **Impacto:** Core Feature | **Esforço:** 4h
+- [ ] Criar procedure `analyzeRisks` no backend
+- [ ] Modificar `aprAI.ts` para retornar análise estruturada de riscos
+- [ ] Identificar riscos com Probabilidade (P) e Severidade (S)
+- [ ] Calcular Nível de Risco (NR = P × S)
+- [ ] Sugerir EPIs obrigatórios
+- [ ] Identificar NRs aplicáveis (NR-10, NR-35, NR-33, etc.)
+- [ ] Adicionar seção "Análise de Riscos" no AprDetail.tsx
+- [ ] Exibir matriz de riscos visual (tabela P×S)
+- [ ] Destacar riscos críticos (NR > 400)
+- **Arquivos:** `server/routers.ts`, `server/aprAI.ts`, `client/src/pages/AprDetail.tsx`
+
+### 7. Filtros Avançados na Lista de APRs
+**Prioridade:** MÉDIA | **Impacto:** UX | **Esforço:** 3h
+- [ ] Filtro por usuário criador
+- [ ] Filtro por período (data início/fim)
+- [ ] Filtro por localização
+- [ ] Busca por número da APR (ID)
+- [ ] Filtro por tipo de risco identificado
+- [ ] Expandir procedure `aprs.list` com novos parâmetros
+- [ ] Usar query params para persistir filtros na URL
+- [ ] Botão "Limpar Filtros" para resetar
+- **Arquivos:** `server/routers.ts`, `server/aprDb.ts`, `client/src/pages/AprList.tsx`
+
+### 8. Estatísticas Avançadas no Dashboard
+**Prioridade:** MÉDIA | **Impacto:** Analytics | **Esforço:** 4h
+- [ ] Gráfico de APRs por mês (linha do tempo)
+- [ ] Top 5 riscos mais frequentes
+- [ ] Top 5 setores com mais APRs
+- [ ] Ranking de usuários mais ativos
+- [ ] Tempo médio de aprovação
+- [ ] Taxa de aprovação vs rejeição
+- [ ] Criar procedures de agregação no backend
+- [ ] Usar biblioteca de gráficos (Recharts ou Chart.js)
+- [ ] Expandir página `/statistics` dedicada
+- [ ] Cards clicáveis que filtram lista de APRs
+- **Arquivos:** `server/routers.ts`, `server/aprDb.ts`, `client/src/pages/Statistics.tsx`
+
+---
+
+## 🟢 DESEJÁVEL - Melhorias de UX/UI
+
+### 9. QR Code e Assinaturas Digitais no PDF
+**Prioridade:** MÉDIA | **Impacto:** Compliance | **Esforço:** 3h
+- [ ] Instalar package `qrcode`: `pnpm add qrcode @types/qrcode`
+- [ ] Gerar QR Code no PDF para validação online
+- [ ] Adicionar assinaturas digitais do solicitante e aprovador
+- [ ] Hash SHA-256 para verificar integridade
+- [ ] Adicionar campo `signatures` na tabela `aprs`
+- [ ] Capturar assinatura digital ao aprovar (nome + timestamp)
+- **Arquivos:** `server/aprPdf.ts`, `drizzle/schema.ts`
+
+### 10. Histórico de Alterações (Audit Trail)
+**Prioridade:** BAIXA | **Impacto:** Compliance | **Esforço:** 2h
+- [ ] Query na tabela `audit_logs` filtrando por `entityId = aprId`
+- [ ] Criar componente `AuditTimeline.tsx`
+- [ ] Adicionar seção "Histórico" no AprDetail.tsx
+- [ ] Linha do tempo visual mostrando quem fez cada alteração e quando
+- [ ] Ícones diferentes para cada tipo de ação
+- **Arquivos:** `server/routers.ts`, `client/src/components/AuditTimeline.tsx`, `client/src/pages/AprDetail.tsx`
+
+### 11. Modo Offline (PWA)
+**Prioridade:** BAIXA | **Impacto:** Mobile UX | **Esforço:** 6h
+- [ ] Adicionar service worker com Vite PWA plugin
+- [ ] Configurar cache de assets estáticos
+- [ ] Usar IndexedDB para armazenar APRs offline
+- [ ] Sincronização automática ao reconectar
+- [ ] Instalar como app no celular
+- [ ] Criar APRs offline e tirar fotos diretamente
+- **Arquivos:** `vite.config.ts`, `client/src/sw.ts`, `client/public/manifest.json`
+
+### 12. Convite de Usuários por Email
+**Prioridade:** BAIXA | **Impacto:** Onboarding | **Esforço:** 4h
+- [ ] Criar tabela `user_invitations`
+- [ ] Procedure `sendInvitation` gera token e envia email
+- [ ] Página `/accept-invite/{token}` para aceitar convite
+- [ ] Enviar convite por email com link de ativação único
+- [ ] Convite expira em 7 dias
+- [ ] Definir perfil (requester, safety_tech) no convite
+- [ ] Usuário define senha ao aceitar
+- **Arquivos:** `drizzle/schema.ts`, `server/routers.ts`, `client/src/pages/AcceptInvite.tsx`
+
+### 13. Customização por Empresa
+**Prioridade:** BAIXA | **Impacto:** Branding | **Esforço:** 3h
+- [ ] Adicionar campos na tabela `companies`: `logoUrl`, `primaryColor`, `secondaryColor`
+- [ ] Carregar configurações ao fazer login
+- [ ] Aplicar tema dinamicamente com CSS variables
+- [ ] Logo personalizado da empresa
+- [ ] Cores do tema customizadas
+- [ ] Cabeçalho/rodapé customizado no PDF
+- [ ] Nome da empresa no topo do sistema
+- **Arquivos:** `drizzle/schema.ts`, `server/routers.ts`, `client/src/App.tsx`
+
+### 14. Exportar APRs para Excel
+**Prioridade:** BAIXA | **Impacto:** Relatórios | **Esforço:** 2h
+- [ ] Instalar `xlsx`: `pnpm add xlsx`
+- [ ] Botão "Exportar para Excel" no AprList.tsx
+- [ ] Gerar arquivo .xlsx no frontend com download automático
+- [ ] Exportar lista de APRs filtrada para Excel
+- [ ] Incluir todas as colunas (ID, título, status, criador, data)
+- [ ] Planilha formatada com cabeçalhos
+- **Arquivos:** `client/src/pages/AprList.tsx`
+
+### 15. Comentários e Discussões na APR
+**Prioridade:** BAIXA | **Impacto:** Colaboração | **Esforço:** 4h
+- [ ] Criar tabela `apr_comments`
+- [ ] Procedures para criar/listar comentários
+- [ ] Componente de comentários no AprDetail.tsx
+- [ ] Adicionar comentários na APR
+- [ ] Notificar participantes de novos comentários
+- [ ] Anexar arquivos aos comentários
+- [ ] Mencionar usuários (@usuario)
+- [ ] WebSocket para notificações em tempo real (opcional)
+- **Arquivos:** `drizzle/schema.ts`, `server/routers.ts`, `client/src/components/AprComments.tsx`
+
+---
+
+## 🔧 TÉCNICO - Melhorias de Código
+
+### 16. Testes Automatizados
+**Prioridade:** MÉDIA | **Impacto:** Qualidade | **Esforço:** 8h
+- [ ] Configurar Vitest para backend
+- [ ] Criar testes unitários para cada procedure tRPC
+- [ ] Mock de banco de dados com SQLite in-memory
+- [ ] Testes de integração para fluxo completo de APR
+- [ ] Testes E2E com Playwright para fluxos críticos
+- **Arquivos:** `server/**/*.test.ts`, `tests/e2e/**/*.spec.ts`
+
+### 17. Documentação da API
+**Prioridade:** BAIXA | **Impacto:** Developer Experience | **Esforço:** 4h
+- [ ] Gerar documentação automática com tRPC OpenAPI
+- [ ] Criar página `/docs` com Swagger UI
+- [ ] Adicionar JSDoc em todos os procedures
+- [ ] Documentar todos os procedures tRPC com exemplos de uso
+- [ ] Documentar permissões necessárias
+- [ ] Documentar schemas de entrada/saída
+- **Arquivos:** `server/routers.ts`, `docs/api.md`
+
+### 18. Otimização de Performance
+**Prioridade:** BAIXA | **Impacto:** Performance | **Esforço:** 6h
+- [ ] Lazy loading de componentes pesados com `React.lazy()`
+- [ ] Configurar `staleTime` e `cacheTime` no tRPC
+- [ ] Converter imagens para WebP no upload
+- [ ] Adicionar `loading="lazy"` em imagens
+- [ ] Code splitting por rota
+- [ ] Cache de queries com React Query
+- **Arquivos:** `client/src/App.tsx`, `client/src/lib/trpc.ts`
+
+---
+
+## 📊 Resumo de Prioridades
+
+| Prioridade | Quantidade | Esforço Total |
+|-----------|-----------|---------------|
+| 🔴 CRÍTICO | 3 tarefas | ~3h |
+| 🟡 IMPORTANTE | 5 tarefas | ~17h |
+| 🟢 DESEJÁVEL | 7 tarefas | ~28h |
+| 🔧 TÉCNICO | 3 tarefas | ~18h |
+| **TOTAL** | **18 tarefas** | **~66h** |
+
+---
+
+## 🎯 Roadmap Sugerido
+
+### Sprint 1 (1 semana) - Correções Críticas
+1. Corrigir erros TypeScript no EditApr.tsx
+2. Exibir respostas do questionário na página de detalhes
+3. Corrigir erro de análise de IA
+
+### Sprint 2 (2 semanas) - Funcionalidades Core
+4. Notificações automáticas por email
+5. Análise de riscos com IA (Matriz P×S=NR)
+6. Botão "Aprimorar com IA" no NewApr.tsx
+
+### Sprint 3 (2 semanas) - UX e Filtros
+7. Filtros avançados na lista de APRs
+8. Estatísticas avançadas no dashboard
+9. QR Code e assinaturas digitais no PDF
+
+### Sprint 4 (1 semana) - Melhorias Secundárias
+10. Histórico de alterações (Audit Trail)
+11. Exportar APRs para Excel
+
+### Backlog - Futuro
+- Modo offline (PWA)
+- Convite de usuários por email
+- Customização por empresa
+- Comentários e discussões
+- Testes automatizados
+- Documentação da API
+- Otimização de performance
+
+---
+
+## 📝 Notas Finais
+
+Este roadmap é uma sugestão baseada nas funcionalidades já implementadas e nas necessidades típicas de um sistema de APR. Priorize as tarefas de acordo com:
+
+1. **Feedback dos usuários** - O que eles mais pedem?
+2. **Compliance regulatório** - O que é obrigatório por lei?
+3. **ROI** - Qual funcionalidade traz mais valor com menos esforço?
+
+**Próximos Passos Imediatos:**
+1. Corrigir erros TypeScript (15min)
+2. Exibir respostas do questionário (2h)
+3. Implementar notificações por email (3h)
